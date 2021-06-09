@@ -23,7 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.favepc.reader.rfidreaderutility.fragment.BLEFragment;
+//import com.favepc.reader.rfidreaderutility.fragment.BLEFragment;
 //import com.favepc.reader.rfidreaderutility.fragment.BLEHandheldFragment;
 import com.favepc.reader.rfidreaderutility.fragment.CommonFragment;
 import com.favepc.reader.rfidreaderutility.fragment.DemoIRFragment;
@@ -340,8 +340,8 @@ public class MainActivity extends AppCompatActivity
                 OTGFragment oTGFragment = new OTGFragment(this, this);
                 return oTGFragment;
             case 6:
-                BLEFragment bLEFragment = new BLEFragment(this, this);
-                return bLEFragment;
+//                BLEFragment bLEFragment = new BLEFragment(this, this);
+//                return bLEFragment;
             case 7:
 //                WiFiFragment wiFiFragment = new WiFiFragment(this, this);
 //                return wiFiFragment;
