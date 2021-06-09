@@ -15,7 +15,6 @@
         android:id="@+id/regular_info_title"
         android:layout_width="match_parent"
         android:layout_height="24dp"
-        android:layout_below="@id/fragment_ble_handheld_msg"
         android:layout_marginStart="@dimen/layout_xl_margin"
         android:layout_marginTop="@dimen/layout_xl_margin"
         android:text="@string/regular_info_title"

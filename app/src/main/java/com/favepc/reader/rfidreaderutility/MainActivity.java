@@ -24,7 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.favepc.reader.rfidreaderutility.fragment.BLEFragment;
-import com.favepc.reader.rfidreaderutility.fragment.BLEHandheldFragment;
+//import com.favepc.reader.rfidreaderutility.fragment.BLEHandheldFragment;
 import com.favepc.reader.rfidreaderutility.fragment.CommonFragment;
 import com.favepc.reader.rfidreaderutility.fragment.DemoIRFragment;
 import com.favepc.reader.rfidreaderutility.fragment.DemoUFragment;
@@ -346,8 +346,8 @@ public class MainActivity extends AppCompatActivity
 //                WiFiFragment wiFiFragment = new WiFiFragment(this, this);
 //                return wiFiFragment;
             case 9:
-                BLEHandheldFragment bLEHandheldFragment = new BLEHandheldFragment(this, this);
-                return bLEHandheldFragment;
+//                BLEHandheldFragment bLEHandheldFragment = new BLEHandheldFragment(this, this);
+//                return bLEHandheldFragment;
             case 10:
                 DemoIRFragment demoIRFragment = new DemoIRFragment(this, this);
                 return demoIRFragment;
