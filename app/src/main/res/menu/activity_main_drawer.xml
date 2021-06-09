@@ -2,10 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_demo"
-            android:icon="@mipmap/ic_demo_black_48dp"
-            android:title="@string/menu_item_demo" />
+        <item android:id="@+id/nav_ci_otg"
+        android:icon="@mipmap/ic_usb_black_48dp"
+        android:title="@string/menu_item_otg" />
         <item
             android:id="@+id/nav_demoUR"
             android:icon="@mipmap/ic_demo_black_48dp"
@@ -21,27 +20,7 @@
     </group>
     <item android:title="@string/menu_item_communication_interface" android:enabled="false"/>
     <group android:checkableBehavior="single">
-        <item android:id="@+id/nav_ci_otg"
-            android:icon="@mipmap/ic_usb_black_48dp"
-            android:title="@string/menu_item_otg" />
+
     </group>
-    <!--
-    <item android:title="@string/menu_item_communication_interface">
-        <menu>
-            <item
-                android:id="@+id/nav_ci_otg"
-                android:icon="@mipmap/ic_usb_black_48dp"
-                android:title="@string/menu_item_otg" />
-            <item
-                android:id="@+id/nav_ci_ble"
-                android:icon="@mipmap/ic_bluetooth_black_48dp"
-                android:title="@string/menu_item_ble" />
-            <item
-                android:id="@+id/nav_ci_wifi"
-                android:icon="@mipmap/ic_wifi_black_48dp"
-                android:title="@string/menu_item_wifi" />
-        </menu>
-    </item>
-    -->
 
 </menu>

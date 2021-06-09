@@ -25,12 +25,11 @@
 
     <!-- Toolbar titles when navigation menu item is selected -->
     <string-array name="nav_item_activity_titles">
-        <item>Multi(U)</item>
+        <item>OTG</item>
         <item>Multi&amp;Read(UR)</item>
         <item>Common(Q,T,P,R,W,L,K)</item>
         <item>Reader Configure</item>
         <item>Communication interface</item>
-        <item>OTG</item>
     </string-array>
 
     <!-- fragment_demo -->

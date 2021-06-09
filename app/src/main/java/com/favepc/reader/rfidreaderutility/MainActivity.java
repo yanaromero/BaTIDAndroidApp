@@ -25,7 +25,7 @@ import android.view.View;
 
 import com.favepc.reader.rfidreaderutility.fragment.CommonFragment;
 //import com.favepc.reader.rfidreaderutility.fragment.DemoIRFragment;
-import com.favepc.reader.rfidreaderutility.fragment.DemoUFragment;
+//import com.favepc.reader.rfidreaderutility.fragment.DemoUFragment;
 import com.favepc.reader.rfidreaderutility.fragment.DemoURFragment;
 import com.favepc.reader.rfidreaderutility.fragment.OTGFragment;
 import com.favepc.reader.rfidreaderutility.fragment.RegularFragment;
@@ -169,10 +169,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.nav_demo:
-                navItemIndex = 0;
-                NAV_CURRENT_TAG = TAG_DEMO;
-                break;
+//            case R.id.nav_demo:
+//                navItemIndex = 0;
+//                NAV_CURRENT_TAG = TAG_DEMO;
+//                break;
             case R.id.nav_demoUR:
                 navItemIndex = 1;
                 NAV_CURRENT_TAG = TAG_DEMOUR;
@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity
                 NAV_CURRENT_TAG = TAG_REGULAR;
                 break;
             case R.id.nav_ci_otg:
-                navItemIndex = 5;
+                navItemIndex = 0;
                 NAV_CURRENT_TAG = TAG_CI_OTG;
                 break;
 
@@ -307,8 +307,8 @@ public class MainActivity extends AppCompatActivity
 
         switch (navItemIndex) {
             case 0:
-                DemoUFragment demoUFragment = new DemoUFragment(this, this);
-                return demoUFragment;
+                OTGFragment oTGFragment = new OTGFragment(this, this);
+                return oTGFragment;
             case 1:
                 DemoURFragment demoURFragment = new DemoURFragment(this, this);
                 return demoURFragment;
@@ -318,11 +318,8 @@ public class MainActivity extends AppCompatActivity
             case 3:
                 RegularFragment regularFragment = new RegularFragment(this, this);
                 return regularFragment;
-            case 5:
-                OTGFragment oTGFragment = new OTGFragment(this, this);
-                return oTGFragment;
             default:
-                return new DemoUFragment(this, this);
+                return new OTGFragment(this, this);
         }
     }
 
