@@ -28,10 +28,6 @@
             android:id="@+id/nav_ci_ble"
             android:icon="@mipmap/ic_bluetooth_black_48dp"
             android:title="@string/menu_item_ble" />
-        <item
-            android:id="@+id/nav_ci_wifi"
-            android:icon="@mipmap/ic_wifi_black_48dp"
-            android:title="@string/menu_item_wifi" />
     </group>
     <item android:title="@string/menu_item_ble_handheld_field" android:enabled="false"/>
     <group android:checkableBehavior="single">
