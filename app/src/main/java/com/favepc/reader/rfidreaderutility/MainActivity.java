@@ -191,10 +191,6 @@ public class MainActivity extends AppCompatActivity
                 navItemIndex = 5;
                 NAV_CURRENT_TAG = TAG_CI_OTG;
                 break;
-            case R.id.nav_ci_ble:
-                navItemIndex = 6;
-                NAV_CURRENT_TAG = TAG_CI_BLE;
-                break;
             case R.id.nav_handheld:
                 navItemIndex = 9;
                 NAV_CURRENT_TAG = TAG_BLE_HANDHELD;
