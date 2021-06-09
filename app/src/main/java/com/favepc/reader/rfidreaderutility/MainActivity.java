@@ -23,10 +23,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-//import com.favepc.reader.rfidreaderutility.fragment.BLEFragment;
-//import com.favepc.reader.rfidreaderutility.fragment.BLEHandheldFragment;
 import com.favepc.reader.rfidreaderutility.fragment.CommonFragment;
-import com.favepc.reader.rfidreaderutility.fragment.DemoIRFragment;
+//import com.favepc.reader.rfidreaderutility.fragment.DemoIRFragment;
 import com.favepc.reader.rfidreaderutility.fragment.DemoUFragment;
 import com.favepc.reader.rfidreaderutility.fragment.DemoURFragment;
 import com.favepc.reader.rfidreaderutility.fragment.OTGFragment;
@@ -191,14 +189,6 @@ public class MainActivity extends AppCompatActivity
                 navItemIndex = 5;
                 NAV_CURRENT_TAG = TAG_CI_OTG;
                 break;
-            case R.id.nav_handheld:
-                navItemIndex = 9;
-                NAV_CURRENT_TAG = TAG_BLE_HANDHELD;
-                break;
-            case R.id.nav_handheld_demo:
-                navItemIndex = 10;
-                NAV_CURRENT_TAG = TAG_BLE_HANDHELD_DEMO;
-                break;
 
         }
 
@@ -331,18 +321,6 @@ public class MainActivity extends AppCompatActivity
             case 5:
                 OTGFragment oTGFragment = new OTGFragment(this, this);
                 return oTGFragment;
-            case 6:
-//                BLEFragment bLEFragment = new BLEFragment(this, this);
-//                return bLEFragment;
-            case 7:
-//                WiFiFragment wiFiFragment = new WiFiFragment(this, this);
-//                return wiFiFragment;
-            case 9:
-//                BLEHandheldFragment bLEHandheldFragment = new BLEHandheldFragment(this, this);
-//                return bLEHandheldFragment;
-            case 10:
-                DemoIRFragment demoIRFragment = new DemoIRFragment(this, this);
-                return demoIRFragment;
             default:
                 return new DemoUFragment(this, this);
         }

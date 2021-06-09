@@ -25,15 +25,6 @@
             android:icon="@mipmap/ic_usb_black_48dp"
             android:title="@string/menu_item_otg" />
     </group>
-    <item android:title="@string/menu_item_ble_handheld_field" android:enabled="false"/>
-    <group android:checkableBehavior="single">
-        <item android:id="@+id/nav_handheld"
-            android:icon="@mipmap/baseline_perm_data_setting_black_48"
-            android:title="@string/menu_item_ble_handheld_mode" />
-        <item android:id="@+id/nav_handheld_demo"
-            android:icon="@mipmap/baseline_settings_remote_black_48"
-            android:title="@string/menu_item_ble_handheld_demo" />
-    </group>
     <!--
     <item android:title="@string/menu_item_communication_interface">
         <menu>
