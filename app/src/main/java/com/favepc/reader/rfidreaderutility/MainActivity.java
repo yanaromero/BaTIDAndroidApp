@@ -31,7 +31,6 @@ import com.favepc.reader.rfidreaderutility.fragment.DemoUFragment;
 import com.favepc.reader.rfidreaderutility.fragment.DemoURFragment;
 import com.favepc.reader.rfidreaderutility.fragment.OTGFragment;
 import com.favepc.reader.rfidreaderutility.fragment.RegularFragment;
-import com.favepc.reader.rfidreaderutility.fragment.WiFiFragment;
 import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
 import com.favepc.reader.service.BluetoothService;
 import com.favepc.reader.service.NetService;
@@ -344,8 +343,8 @@ public class MainActivity extends AppCompatActivity
                 BLEFragment bLEFragment = new BLEFragment(this, this);
                 return bLEFragment;
             case 7:
-                WiFiFragment wiFiFragment = new WiFiFragment(this, this);
-                return wiFiFragment;
+//                WiFiFragment wiFiFragment = new WiFiFragment(this, this);
+//                return wiFiFragment;
             case 9:
                 BLEHandheldFragment bLEHandheldFragment = new BLEHandheldFragment(this, this);
                 return bLEHandheldFragment;
