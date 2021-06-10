@@ -33,7 +33,6 @@ import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
 import com.favepc.reader.rfidreaderutility.pager.CommonKillPage;
 import com.favepc.reader.rfidreaderutility.pager.CommonLockPage;
 import com.favepc.reader.rfidreaderutility.pager.CommonReadPage;
-import com.favepc.reader.rfidreaderutility.pager.CommonWritePage;
 import com.favepc.reader.service.OTGService;
 import com.favepc.reader.service.ReaderService;
 
@@ -73,7 +72,6 @@ public class CommonFragment extends Fragment {
 
     private int	mCommonPagePosition = PAGE_EPC;
     private CommonReadPage mCommonReadPage;
-    private CommonWritePage mCommonWritePage;
     private CommonLockPage mCommonLockPage;
     private CommonKillPage mCommonKillPage;
 
@@ -112,7 +110,6 @@ public class CommonFragment extends Fragment {
 
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonReadPage.COMMON_ACTION_READ));
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonReadPage.COMMON_ACTION_READ_END));
-        this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonWritePage.COMMON_ACTION_WRITE));
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonLockPage.COMMON_ACTION_LOCK));
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonKillPage.COMMON_ACTION_KILL));
     }
@@ -142,7 +139,6 @@ public class CommonFragment extends Fragment {
                     //create pager: epc,tid, read, write
                     {
                         mCommonReadPage = new CommonReadPage(mContext, mActivity, mLayoutInflater, mReaderService, mCustomKeyboardManager);
-                        mCommonWritePage = new CommonWritePage(mContext, mActivity, mLayoutInflater, mReaderService, mCustomKeyboardManager);
                         mCommonLockPage = new CommonLockPage(mContext, mActivity, mLayoutInflater, mReaderService, mCustomKeyboardManager);
                         mCommonKillPage = new CommonKillPage(mContext, mActivity, mLayoutInflater, mReaderService, mCustomKeyboardManager);
                     }
@@ -150,7 +146,6 @@ public class CommonFragment extends Fragment {
                     {
                         mListCommonPageViews = new ArrayList<View>();
                         mListCommonPageViews.add(mCommonReadPage.getView());
-                        mListCommonPageViews.add(mCommonWritePage.getView());
                         mListCommonPageViews.add(mCommonLockPage.getView());
                         mListCommonPageViews.add(mCommonKillPage.getView());
                     }
@@ -170,13 +165,6 @@ public class CommonFragment extends Fragment {
                             initCommon();
                             mCommonPagePosition = position;
                             switch (position) {
-                                case 3:
-                                    mCommonWritePage.setSelectMemory(mAppContext.getSelectMemory());
-                                    mCommonWritePage.setSelectAddress(mAppContext.getSelectAddress());
-                                    mCommonWritePage.setSelectLength(mAppContext.getSelectLength());
-                                    mCommonWritePage.setSelectData(mAppContext.getSelectData());
-                                    mCommonWritePage.setAccessPassword(mAppContext.getAccessPassword());
-                                    break;
                                 case 4:
                                     mCommonLockPage.setSelectMemory(mAppContext.getSelectMemory());
                                     mCommonLockPage.setSelectAddress(mAppContext.getSelectAddress());
@@ -269,11 +257,6 @@ public class CommonFragment extends Fragment {
                     break;
                 case CommonReadPage.COMMON_ACTION_READ:
                     mProcessCommand = CommonReadPage.COMMON_ACTION_READ;
-                    mProcessList = (ArrayList<HashMap<String, String>>) intent.getExtras().get(CommonReadPage.PROCESS_ARGUMENT);
-                    mCommonHandler.post(mRunnableBackground);
-                    break;
-                case CommonWritePage.COMMON_ACTION_WRITE:
-                    mProcessCommand = CommonWritePage.COMMON_ACTION_WRITE;
                     mProcessList = (ArrayList<HashMap<String, String>>) intent.getExtras().get(CommonReadPage.PROCESS_ARGUMENT);
                     mCommonHandler.post(mRunnableBackground);
                     break;
@@ -424,7 +407,6 @@ public class CommonFragment extends Fragment {
                         //[TX]
                         switch (mProcessCommand) {
                             case CommonReadPage.COMMON_ACTION_READ:
-                            case CommonWritePage.COMMON_ACTION_WRITE:
                             case CommonLockPage.COMMON_ACTION_LOCK:
                             case CommonKillPage.COMMON_ACTION_KILL:
 
@@ -498,7 +480,6 @@ public class CommonFragment extends Fragment {
                         if (
 //                                mProcessCommand.equals(CommonReadPage.COMMON_ACTION_READ) ||
                                 mProcessCommand.equals(CommonReadPage.COMMON_ACTION_READ_END) ||
-                                mProcessCommand.equals(CommonWritePage.COMMON_ACTION_WRITE) ||
                                 mProcessCommand.equals(CommonLockPage.COMMON_ACTION_LOCK)) {
                             if (_processIndex == mProcessList.size()){
 
