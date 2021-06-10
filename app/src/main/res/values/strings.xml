@@ -10,25 +10,13 @@
     <string name="nav_header_name">Reader Utility</string>
     <string name="nav_header_version">v2.2  2018/7/20</string>
 
-    <string name="menu_item_demo">Multi(U)</string>
-    <string name="menu_item_demoUR">Multi&amp;Read(UR)</string>
     <string name="menu_item_common">Common(Q,T,P,R,W,L,K)</string>
-    <string name="menu_item_regular">Reader Configure</string>
-    <string name="menu_item_ble_handheld_mode">RFID Mode Set</string>
-    <string name="menu_item_ble_handheld_demo">RFID/IR Code Demo</string>
-    <string name="menu_item_pager">Pager</string>
-    <string name="menu_item_communication_interface">Communication Interface</string>
-    <string name="menu_item_ble_handheld_field">BLE Handheld Project</string>
     <string name="menu_item_otg">OTG</string>
-    <string name="menu_item_ble">BLE</string>
-    <string name="menu_item_wifi">Wi-Fi</string>
 
     <!-- Toolbar titles when navigation menu item is selected -->
     <string-array name="nav_item_activity_titles">
         <item>OTG</item>
         <item>Common(Q,T,P,R,W,L,K)</item>
-        <item>Reader Configure</item>
-        <item>Communication interface</item>
     </string-array>
 
     <!-- fragment_demo -->

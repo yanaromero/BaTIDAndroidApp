@@ -28,7 +28,7 @@ import com.favepc.reader.rfidreaderutility.fragment.CommonFragment;
 //import com.favepc.reader.rfidreaderutility.fragment.DemoUFragment;
 //import com.favepc.reader.rfidreaderutility.fragment.DemoURFragment;
 import com.favepc.reader.rfidreaderutility.fragment.OTGFragment;
-import com.favepc.reader.rfidreaderutility.fragment.RegularFragment;
+//import com.favepc.reader.rfidreaderutility.fragment.RegularFragment;
 import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
 import com.favepc.reader.service.BluetoothService;
 import com.favepc.reader.service.NetService;
@@ -171,10 +171,6 @@ public class MainActivity extends AppCompatActivity
                 navItemIndex = 1;
                 NAV_CURRENT_TAG = TAG_COMMON;
                 break;
-            case R.id.nav_regular:
-                navItemIndex = 2;
-                NAV_CURRENT_TAG = TAG_REGULAR;
-                break;
             case R.id.nav_ci_otg:
                 navItemIndex = 0;
                 NAV_CURRENT_TAG = TAG_CI_OTG;
@@ -302,9 +298,6 @@ public class MainActivity extends AppCompatActivity
             case 1:
                 CommonFragment commonFragment = new CommonFragment(this, this);
                 return commonFragment;
-            case 2:
-                RegularFragment regularFragment = new RegularFragment(this, this);
-                return regularFragment;
             default:
                 return new OTGFragment(this, this);
         }
