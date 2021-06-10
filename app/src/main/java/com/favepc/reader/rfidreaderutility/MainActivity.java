@@ -26,7 +26,7 @@ import android.view.View;
 import com.favepc.reader.rfidreaderutility.fragment.CommonFragment;
 //import com.favepc.reader.rfidreaderutility.fragment.DemoIRFragment;
 //import com.favepc.reader.rfidreaderutility.fragment.DemoUFragment;
-import com.favepc.reader.rfidreaderutility.fragment.DemoURFragment;
+//import com.favepc.reader.rfidreaderutility.fragment.DemoURFragment;
 import com.favepc.reader.rfidreaderutility.fragment.OTGFragment;
 import com.favepc.reader.rfidreaderutility.fragment.RegularFragment;
 import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
@@ -51,8 +51,6 @@ public class MainActivity extends AppCompatActivity
     public static final String TAG_CI_BLE  = "BLE";
     public static final String TAG_CI_WIFI = "WiFi";
     public static final String TAG_CI_UNLINK = "UNLINK";
-    private static final String TAG_BLE_HANDHELD = "BLE Handheld";
-    private static final String TAG_BLE_HANDHELD_DEMO = "Handheld Demo";
     private static String NAV_CURRENT_TAG = TAG_DEMO;
     private static String COMMUNICATION_INTERFACE = TAG_CI_UNLINK;
 
@@ -169,20 +167,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-//            case R.id.nav_demo:
-//                navItemIndex = 0;
-//                NAV_CURRENT_TAG = TAG_DEMO;
-//                break;
-            case R.id.nav_demoUR:
-                navItemIndex = 1;
-                NAV_CURRENT_TAG = TAG_DEMOUR;
-                break;
             case R.id.nav_common:
-                navItemIndex = 2;
+                navItemIndex = 1;
                 NAV_CURRENT_TAG = TAG_COMMON;
                 break;
             case R.id.nav_regular:
-                navItemIndex = 3;
+                navItemIndex = 2;
                 NAV_CURRENT_TAG = TAG_REGULAR;
                 break;
             case R.id.nav_ci_otg:
@@ -310,12 +300,9 @@ public class MainActivity extends AppCompatActivity
                 OTGFragment oTGFragment = new OTGFragment(this, this);
                 return oTGFragment;
             case 1:
-                DemoURFragment demoURFragment = new DemoURFragment(this, this);
-                return demoURFragment;
-            case 2:
                 CommonFragment commonFragment = new CommonFragment(this, this);
                 return commonFragment;
-            case 3:
+            case 2:
                 RegularFragment regularFragment = new RegularFragment(this, this);
                 return regularFragment;
             default:

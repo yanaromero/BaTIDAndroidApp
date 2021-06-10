@@ -6,10 +6,6 @@
         android:icon="@mipmap/ic_usb_black_48dp"
         android:title="@string/menu_item_otg" />
         <item
-            android:id="@+id/nav_demoUR"
-            android:icon="@mipmap/ic_demo_black_48dp"
-            android:title="@string/menu_item_demoUR" />
-        <item
             android:id="@+id/nav_common"
             android:icon="@mipmap/ic_demo_black_48dp"
             android:title="@string/menu_item_common" />
