@@ -33,7 +33,6 @@ import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
 import com.favepc.reader.rfidreaderutility.pager.CommonKillPage;
 import com.favepc.reader.rfidreaderutility.pager.CommonLockPage;
 import com.favepc.reader.rfidreaderutility.pager.CommonReadPage;
-import com.favepc.reader.rfidreaderutility.pager.CommonTIDPage;
 import com.favepc.reader.rfidreaderutility.pager.CommonWritePage;
 import com.favepc.reader.service.OTGService;
 import com.favepc.reader.service.ReaderService;
@@ -73,7 +72,6 @@ public class CommonFragment extends Fragment {
     public static final int PAGE_READ = 2;
 
     private int	mCommonPagePosition = PAGE_EPC;
-    private CommonTIDPage mCommonTIDPage;
     private CommonReadPage mCommonReadPage;
     private CommonWritePage mCommonWritePage;
     private CommonLockPage mCommonLockPage;
@@ -112,10 +110,6 @@ public class CommonFragment extends Fragment {
         this.mCommnoMsgReceiver = new CommonMsgReceiver();
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(OTGService.OTG_ACTION_DISCONNECTED_COMMON));
 
-        this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonTIDPage.COMMON_ACTION_TID_REPEAT));
-        this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonTIDPage.COMMON_ACTION_TID_ONE));
-        this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonTIDPage.COMMON_ACTION_TID_END));
-
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonReadPage.COMMON_ACTION_READ));
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonReadPage.COMMON_ACTION_READ_END));
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonWritePage.COMMON_ACTION_WRITE));
@@ -147,7 +141,6 @@ public class CommonFragment extends Fragment {
                 public void run() {
                     //create pager: epc,tid, read, write
                     {
-                        mCommonTIDPage = new CommonTIDPage(mContext, mActivity, mLayoutInflater, mReaderService);
                         mCommonReadPage = new CommonReadPage(mContext, mActivity, mLayoutInflater, mReaderService, mCustomKeyboardManager);
                         mCommonWritePage = new CommonWritePage(mContext, mActivity, mLayoutInflater, mReaderService, mCustomKeyboardManager);
                         mCommonLockPage = new CommonLockPage(mContext, mActivity, mLayoutInflater, mReaderService, mCustomKeyboardManager);
@@ -156,7 +149,6 @@ public class CommonFragment extends Fragment {
                     //add page view
                     {
                         mListCommonPageViews = new ArrayList<View>();
-                        mListCommonPageViews.add(mCommonTIDPage.getView());
                         mListCommonPageViews.add(mCommonReadPage.getView());
                         mListCommonPageViews.add(mCommonWritePage.getView());
                         mListCommonPageViews.add(mCommonLockPage.getView());
@@ -275,20 +267,6 @@ public class CommonFragment extends Fragment {
                     mProcessCommand = CommonReadPage.COMMON_ACTION_READ_END;
                     mCommonHandler.removeCallbacks(mRunnableBackground);
                     break;
-                case CommonTIDPage.COMMON_ACTION_TID_ONE:
-                    mProcessCommand = CommonTIDPage.COMMON_ACTION_TID_ONE;
-                    mProcess = mReaderService.TID();
-                    mCommonHandler.post(mRunnableBackground);
-                    break;
-                case CommonTIDPage.COMMON_ACTION_TID_REPEAT:
-                    mProcessCommand = CommonTIDPage.COMMON_ACTION_TID_REPEAT;
-                    mProcess = mReaderService.TID();
-                    mCommonHandler.post(mRunnableBackground);
-                    break;
-                case CommonTIDPage.COMMON_ACTION_TID_END:
-                    mProcessCommand = CommonTIDPage.COMMON_ACTION_TID_END;
-                    mCommonHandler.removeCallbacks(mRunnableBackground);
-                    break;
                 case CommonReadPage.COMMON_ACTION_READ:
                     mProcessCommand = CommonReadPage.COMMON_ACTION_READ;
                     mProcessList = (ArrayList<HashMap<String, String>>) intent.getExtras().get(CommonReadPage.PROCESS_ARGUMENT);
@@ -319,9 +297,6 @@ public class CommonFragment extends Fragment {
      * */
     private void initCommon() {
         switch(mCommonPagePosition) {
-            case PAGE_TID:
-                mCommonTIDPage.setInit();
-                break;
             case PAGE_READ:
                 mCommonReadPage.setInit();
                 break;
@@ -402,16 +377,6 @@ public class CommonFragment extends Fragment {
 //                        }
                     }
                     Log.d("print: ",s);
-                    switch (mProcessCommand) {
-//                        case CommonEPCPage.COMMON_ACTION_EPC_ONE:
-//                        case CommonEPCPage.COMMON_ACTION_EPC_REPEAT:
-//                            mCommonEPCPage.setData(ReaderService.Format.removeCRLFandTarget((String) msg.obj, "Q"));
-//                            break;
-                        case CommonTIDPage.COMMON_ACTION_TID_ONE:
-                        case CommonTIDPage.COMMON_ACTION_TID_REPEAT:
-                            mCommonTIDPage.setData(ReaderService.Format.removeCRLFandTarget((String) msg.obj, "R"));
-                            break;
-                    }
 
                     break;
             }
@@ -458,12 +423,6 @@ public class CommonFragment extends Fragment {
 
                         //[TX]
                         switch (mProcessCommand) {
-//                            case CommonEPCPage.COMMON_ACTION_EPC_ONE:
-//                            case CommonEPCPage.COMMON_ACTION_EPC_REPEAT:
-                            case CommonTIDPage.COMMON_ACTION_TID_ONE:
-                            case CommonTIDPage.COMMON_ACTION_TID_REPEAT:
-                                mCommonHandler.sendMessage(mCommonHandler.obtainMessage(1, mProcess));
-                                break;
                             case CommonReadPage.COMMON_ACTION_READ:
                             case CommonWritePage.COMMON_ACTION_WRITE:
                             case CommonLockPage.COMMON_ACTION_LOCK:
@@ -531,10 +490,6 @@ public class CommonFragment extends Fragment {
                         _processIndex = (_processIndex+1)%mProcessList.size();
 
                         if (
-//                                mProcessCommand.equals(CommonEPCPage.COMMON_ACTION_EPC_ONE) ||
-//                                mProcessCommand.equals(CommonEPCPage.COMMON_ACTION_EPC_END) ||
-                                mProcessCommand.equals(CommonTIDPage.COMMON_ACTION_TID_ONE) ||
-                                mProcessCommand.equals(CommonTIDPage.COMMON_ACTION_TID_END) ||
                                 mProcessCommand.equals(CommonKillPage.COMMON_ACTION_KILL)) {
                             return;
                         }
