@@ -30,7 +30,6 @@ import com.favepc.reader.rfidreaderutility.adapter.CommonPageAdapter;
 import com.favepc.reader.rfidreaderutility.adapter.WrapContentViewPager;
 import com.favepc.reader.rfidreaderutility.object.Common;
 import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
-import com.favepc.reader.rfidreaderutility.pager.CommonEPCPage;
 import com.favepc.reader.rfidreaderutility.pager.CommonKillPage;
 import com.favepc.reader.rfidreaderutility.pager.CommonLockPage;
 import com.favepc.reader.rfidreaderutility.pager.CommonReadPage;
@@ -74,7 +73,6 @@ public class CommonFragment extends Fragment {
     public static final int PAGE_READ = 2;
 
     private int	mCommonPagePosition = PAGE_EPC;
-    private CommonEPCPage mCommonEPCPage;
     private CommonTIDPage mCommonTIDPage;
     private CommonReadPage mCommonReadPage;
     private CommonWritePage mCommonWritePage;
@@ -114,10 +112,6 @@ public class CommonFragment extends Fragment {
         this.mCommnoMsgReceiver = new CommonMsgReceiver();
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(OTGService.OTG_ACTION_DISCONNECTED_COMMON));
 
-        this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonEPCPage.COMMON_ACTION_EPC_REPEAT));
-        this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonEPCPage.COMMON_ACTION_EPC_ONE));
-        this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonEPCPage.COMMON_ACTION_EPC_END));
-
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonTIDPage.COMMON_ACTION_TID_REPEAT));
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonTIDPage.COMMON_ACTION_TID_ONE));
         this.mContext.registerReceiver(this.mCommnoMsgReceiver, new IntentFilter(CommonTIDPage.COMMON_ACTION_TID_END));
@@ -153,7 +147,6 @@ public class CommonFragment extends Fragment {
                 public void run() {
                     //create pager: epc,tid, read, write
                     {
-                        mCommonEPCPage = new CommonEPCPage(mContext, mActivity, mLayoutInflater, mReaderService);
                         mCommonTIDPage = new CommonTIDPage(mContext, mActivity, mLayoutInflater, mReaderService);
                         mCommonReadPage = new CommonReadPage(mContext, mActivity, mLayoutInflater, mReaderService, mCustomKeyboardManager);
                         mCommonWritePage = new CommonWritePage(mContext, mActivity, mLayoutInflater, mReaderService, mCustomKeyboardManager);
@@ -163,7 +156,6 @@ public class CommonFragment extends Fragment {
                     //add page view
                     {
                         mListCommonPageViews = new ArrayList<View>();
-                        mListCommonPageViews.add(mCommonEPCPage.getView());
                         mListCommonPageViews.add(mCommonTIDPage.getView());
                         mListCommonPageViews.add(mCommonReadPage.getView());
                         mListCommonPageViews.add(mCommonWritePage.getView());
@@ -186,13 +178,6 @@ public class CommonFragment extends Fragment {
                             initCommon();
                             mCommonPagePosition = position;
                             switch (position) {
-                                case 2:
-//                                    mCommonReadPage.setSelectMemory(mAppContext.getSelectMemory());
-//                                    mCommonReadPage.setSelectAddress(mAppContext.getSelectAddress());
-//                                    mCommonReadPage.setSelectLength(mAppContext.getSelectLength());
-//                                    mCommonReadPage.setSelectData(mAppContext.getSelectData());
-//                                    mCommonReadPage.setAccessPassword(mAppContext.getAccessPassword());
-                                    break;
                                 case 3:
                                     mCommonWritePage.setSelectMemory(mAppContext.getSelectMemory());
                                     mCommonWritePage.setSelectAddress(mAppContext.getSelectAddress());
@@ -286,20 +271,6 @@ public class CommonFragment extends Fragment {
                 case OTGService.OTG_ACTION_DISCONNECTED_COMMON:
                     initCommon();
                     break;
-                case CommonEPCPage.COMMON_ACTION_EPC_ONE:
-                    mProcessCommand = CommonEPCPage.COMMON_ACTION_EPC_ONE;
-                    mProcess = mReaderService.Q();
-                    mCommonHandler.post(mRunnableBackground);
-                    break;
-                case CommonEPCPage.COMMON_ACTION_EPC_REPEAT:
-                    mProcessCommand = CommonEPCPage.COMMON_ACTION_EPC_REPEAT;
-                    mProcess = mReaderService.Q();
-                    mCommonHandler.post(mRunnableBackground);
-                    break;
-                case CommonEPCPage.COMMON_ACTION_EPC_END:
-                    mProcessCommand = CommonEPCPage.COMMON_ACTION_EPC_END;
-                    mCommonHandler.removeCallbacks(mRunnableBackground);
-                    break;
                 case CommonReadPage.COMMON_ACTION_READ_END:
                     mProcessCommand = CommonReadPage.COMMON_ACTION_READ_END;
                     mCommonHandler.removeCallbacks(mRunnableBackground);
@@ -348,9 +319,6 @@ public class CommonFragment extends Fragment {
      * */
     private void initCommon() {
         switch(mCommonPagePosition) {
-            case PAGE_EPC:
-                mCommonEPCPage.setInit();
-                break;
             case PAGE_TID:
                 mCommonTIDPage.setInit();
                 break;
@@ -435,10 +403,10 @@ public class CommonFragment extends Fragment {
                     }
                     Log.d("print: ",s);
                     switch (mProcessCommand) {
-                        case CommonEPCPage.COMMON_ACTION_EPC_ONE:
-                        case CommonEPCPage.COMMON_ACTION_EPC_REPEAT:
-                            mCommonEPCPage.setData(ReaderService.Format.removeCRLFandTarget((String) msg.obj, "Q"));
-                            break;
+//                        case CommonEPCPage.COMMON_ACTION_EPC_ONE:
+//                        case CommonEPCPage.COMMON_ACTION_EPC_REPEAT:
+//                            mCommonEPCPage.setData(ReaderService.Format.removeCRLFandTarget((String) msg.obj, "Q"));
+//                            break;
                         case CommonTIDPage.COMMON_ACTION_TID_ONE:
                         case CommonTIDPage.COMMON_ACTION_TID_REPEAT:
                             mCommonTIDPage.setData(ReaderService.Format.removeCRLFandTarget((String) msg.obj, "R"));
@@ -490,8 +458,8 @@ public class CommonFragment extends Fragment {
 
                         //[TX]
                         switch (mProcessCommand) {
-                            case CommonEPCPage.COMMON_ACTION_EPC_ONE:
-                            case CommonEPCPage.COMMON_ACTION_EPC_REPEAT:
+//                            case CommonEPCPage.COMMON_ACTION_EPC_ONE:
+//                            case CommonEPCPage.COMMON_ACTION_EPC_REPEAT:
                             case CommonTIDPage.COMMON_ACTION_TID_ONE:
                             case CommonTIDPage.COMMON_ACTION_TID_REPEAT:
                                 mCommonHandler.sendMessage(mCommonHandler.obtainMessage(1, mProcess));
@@ -563,8 +531,8 @@ public class CommonFragment extends Fragment {
                         _processIndex = (_processIndex+1)%mProcessList.size();
 
                         if (
-                                mProcessCommand.equals(CommonEPCPage.COMMON_ACTION_EPC_ONE) ||
-                                mProcessCommand.equals(CommonEPCPage.COMMON_ACTION_EPC_END) ||
+//                                mProcessCommand.equals(CommonEPCPage.COMMON_ACTION_EPC_ONE) ||
+//                                mProcessCommand.equals(CommonEPCPage.COMMON_ACTION_EPC_END) ||
                                 mProcessCommand.equals(CommonTIDPage.COMMON_ACTION_TID_ONE) ||
                                 mProcessCommand.equals(CommonTIDPage.COMMON_ACTION_TID_END) ||
                                 mProcessCommand.equals(CommonKillPage.COMMON_ACTION_KILL)) {
