@@ -275,34 +275,42 @@ public class CommonFragment extends Fragment {
         public void handleMessage(Message msg) {
             switch(msg.what) {
                 case 1://[TX]
-//                    updateView(new Common(false,
-//                            ReaderService.Format.showCRLF(ReaderService.Format.bytesToString((byte[])msg.obj)),
-//                            mDateFormat.format(new Date())));
                     ((MainActivity) mActivity).sendData((byte[])msg.obj);
                     break;
                 case 2://[RX]
-//                    updateView(new Common(true,
-//                            ReaderService.Format.showCRLF((String)msg.obj),
-//                            mDateFormat.format(new Date())));
                     String s = ReaderService.Format.removeCRLF((String)msg.obj);
 
                     if(s.contains("R")){
                         read = s;
-                        if(!read.equals("R")&&!epc.equals("Q")&&!write.equals("W")) {
+                        if(
+                                !read.equals("R")&& // checks if user memory reading was successful
+                                !epc.equals("Q")&&  // checks if EPC reading was successful
+                                !write.equals("W") // checks if writing to memory was successful
+                        ) {
+                            if (read.equals("R8100")){
+                                updateView(new Common(true,
+                                        "Your tag has low battery.",
+                                        mDateFormat.format(new Date())));
+                            }else if (read.equals("R0100")){
+                                updateView(new Common(true,
+                                        "Temperature reading was invalid. Please try again.",
+                                        mDateFormat.format(new Date())));
+                            }
+                            else{
+                                epc = epc.replace("Q", "");
+                                updateView(new Common(true,
+                                        epc,
+                                        mDateFormat.format(new Date())));
 
-                            epc = epc.replace("Q", "");
-                            updateView(new Common(true,
-                                    epc,
-                                    mDateFormat.format(new Date())));
-
-                            read = read.replace("R", "");
-                            tempRaw = Integer.parseInt(read, 16);
-                            tempConvert = tempRaw;
-                            tempConvert = tempConvert / 4;
-                            read = "Temperature: " + String.valueOf(tempConvert) + " C";
-                            updateView(new Common(true,
-                                    read,
-                                    mDateFormat.format(new Date())));
+                                read = read.replace("R", "");
+                                tempRaw = Integer.parseInt(read, 16);
+                                tempConvert = tempRaw;
+                                tempConvert = tempConvert / 4;
+                                read = "Temperature: " + String.valueOf(tempConvert) + " C";
+                                updateView(new Common(true,
+                                        read,
+                                        mDateFormat.format(new Date())));
+                            }
 
 
                         }
@@ -310,19 +318,10 @@ public class CommonFragment extends Fragment {
 
                     else if(s.contains("W")) {
                         write = s;
-//                        if(s.length()>1&&!epc.equals("Q")){
-//
-//                        }
                     }
                     else if (s.contains("Q")){
                         epc = s;
-//                        if(s.length()>1){
-//                            updateView(new Common(true,
-//                                    s,
-//                                    mDateFormat.format(new Date())));
-//                        }
                     }
-                    Log.d("print: ",s);
 
                     break;
             }
@@ -425,7 +424,6 @@ public class CommonFragment extends Fragment {
                                 return;
                         }
 
-                        Log.d("mProcessCommand:", mProcessCommand);
                         _processIndex = (_processIndex+1)%mProcessList.size();
 
 
