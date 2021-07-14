@@ -22,6 +22,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.favepc.reader.rfidreaderutility.fragment.CommonFragment;
 //import com.favepc.reader.rfidreaderutility.fragment.DemoIRFragment;
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity
 
         setContentView(R.layout.activity_main);
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         startService(new Intent(MainActivity.this, OTGService.class));
         startService(new Intent(MainActivity.this, NetService.class));

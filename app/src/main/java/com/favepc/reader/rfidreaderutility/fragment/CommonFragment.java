@@ -33,12 +33,22 @@ import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
 import com.favepc.reader.rfidreaderutility.pager.CommonReadPage;
 import com.favepc.reader.service.OTGService;
 import com.favepc.reader.service.ReaderService;
+import com.favepc.reader.rfidreaderutility.ApiHolder;
+import com.favepc.reader.rfidreaderutility.TempData;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by Bruce_Chiang on 2017/3/10.
@@ -84,6 +94,8 @@ public class CommonFragment extends Fragment {
     private String write;
     private String read;
 
+    ApiHolder apiHolder;
+
     public CommonFragment() {
         super();
     }
@@ -112,6 +124,16 @@ public class CommonFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
+//        Gson gson = new GsonBuilder()
+//                .setLenient()
+//                .create();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.1.4:8000/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        apiHolder = retrofit.create(ApiHolder.class);
     }
 
     @Nullable
@@ -268,6 +290,45 @@ public class CommonFragment extends Fragment {
         }
     }
 
+    private void createPost(String epcPost, String tempPost) {
+
+        TempData tempData = new TempData(tempPost,epcPost);
+
+//        Call call = apiHolder.createPost(tempData);
+//
+//        call.enqueue(new Callback() {
+//            @Override
+//            public void onResponse(Call call, Response response) {
+//                if(!response.isSuccessful()){
+//                    Log.d("TRACK", "onResponse: " + response.code());
+//                }
+//                Log.d("TRACK","body response:" + response.body());
+//            }
+//
+//            @Override
+//            public void onFailure(Call call, Throwable throwable) {
+//                Log.d("TRACK","Failure message:" + throwable.getMessage());
+//            }
+//        });
+
+        Call<TempData> call = apiHolder.createPost(tempData);
+
+        call.enqueue(new Callback<TempData>() {
+            @Override
+            public void onResponse(Call<TempData> call, Response<TempData> response) {
+                if(!response.isSuccessful()){
+                    Log.d("TRACK", "onResponse: " + response.code());
+                }
+                Log.d("TRACK","body response:" + response.body());
+            }
+
+            @Override
+            public void onFailure(Call<TempData> call, Throwable throwable) {
+                Log.d("TRACK","Failure message:" + throwable.getMessage());
+            }
+        });
+
+    }
 
     private Handler mCommonHandler = new Handler() {
         @SuppressLint("HandlerLeak")
@@ -307,6 +368,7 @@ public class CommonFragment extends Fragment {
                                 tempConvert = tempRaw;
                                 tempConvert = tempConvert / 4;
                                 read = "Temperature: " + String.valueOf(tempConvert) + " C";
+                                createPost(epc,String.valueOf(tempConvert));
                                 updateView(new Common(true,
                                         read,
                                         mDateFormat.format(new Date())));
