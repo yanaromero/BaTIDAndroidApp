@@ -93,6 +93,8 @@ public class CommonFragment extends Fragment {
     private String epc;
     private String write;
     private String read;
+    private String readerID;
+    private String datetime;
 
     ApiHolder apiHolder;
 
@@ -290,26 +292,9 @@ public class CommonFragment extends Fragment {
         }
     }
 
-    private void createPost(String epcPost, String tempPost) {
+    private void createPost(String epcPost, String tempPost, String locationPost, String datetimePost) {
 
-        TempData tempData = new TempData(tempPost,epcPost);
-
-//        Call call = apiHolder.createPost(tempData);
-//
-//        call.enqueue(new Callback() {
-//            @Override
-//            public void onResponse(Call call, Response response) {
-//                if(!response.isSuccessful()){
-//                    Log.d("TRACK", "onResponse: " + response.code());
-//                }
-//                Log.d("TRACK","body response:" + response.body());
-//            }
-//
-//            @Override
-//            public void onFailure(Call call, Throwable throwable) {
-//                Log.d("TRACK","Failure message:" + throwable.getMessage());
-//            }
-//        });
+        TempData tempData = new TempData(tempPost,epcPost, locationPost, datetimePost);
 
         Call<TempData> call = apiHolder.createPost(tempData);
 
@@ -368,10 +353,17 @@ public class CommonFragment extends Fragment {
                                 tempConvert = tempRaw;
                                 tempConvert = tempConvert / 4;
                                 read = "Temperature: " + String.valueOf(tempConvert) + " C";
-                                createPost(epc,String.valueOf(tempConvert));
+
+                                readerID = readerID.replace("S","");
+
+                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                datetime = sdf.format(new Date());
+
+                                createPost(epc,String.valueOf(tempConvert),readerID,datetime);
                                 updateView(new Common(true,
                                         read,
                                         mDateFormat.format(new Date())));
+
                             }
 
 
@@ -383,6 +375,9 @@ public class CommonFragment extends Fragment {
                     }
                     else if (s.contains("Q")){
                         epc = s;
+                    }
+                    else if (s.contains("S")){
+                        readerID = s;
                     }
 
                     break;

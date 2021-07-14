@@ -92,6 +92,13 @@ public class CommonReadPage {
                             mRunningFlag = true;
 
                             mButton.setText("Stop");
+
+                            _d = mReaderService.S();
+                            _item = new HashMap<String, String>();
+                            _item.put(PROCESS_COMMAND, "S");
+                            _item.put(PROCESS_DATA, ReaderService.Format.bytesToString(_d));
+                            mProcessList.add(_item);
+
                             _d = mReaderService.Q();
                             _item = new HashMap<String, String>();
                             _item.put(PROCESS_COMMAND, "Q");

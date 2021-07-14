@@ -9,13 +9,6 @@ import retrofit2.http.Query;
 
 public interface ApiHolder {
 
-    @FormUrlEncoded
-    @POST("create.php")
-    Call<TempData> createPost(
-            @Field("epc") String epc,
-            @Field("temp") String temp
-    );
-
     @POST("create.php")
     Call<TempData> createPost(@Body TempData body);
     
