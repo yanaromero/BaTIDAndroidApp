@@ -90,9 +90,11 @@ public class CommonFragment extends Fragment {
     private SimpleDateFormat mDateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
     private CustomKeyboardManager mCustomKeyboardManager;
 
-    private String epc;
+    private String epcPrev;
+    private String epcCur;
     private String write;
-    private String read;
+    private String readPrev = "";
+    private String readCur;
     private String readerID;
     private String datetime;
 
@@ -327,45 +329,63 @@ public class CommonFragment extends Fragment {
                     String s = ReaderService.Format.removeCRLF((String)msg.obj);
 
                     if(s.contains("R")){
-                        read = s;
+                        readCur = s;
                         if(
-                                !read.equals("R")&& // checks if user memory reading was successful
-                                !epc.equals("Q")&&  // checks if EPC reading was successful
+                                !readCur.equals("R")&& // checks if user memory reading was successful
+                                !epcCur.equals("Q")&&  // checks if EPC reading was successful
                                 !write.equals("W") // checks if writing to memory was successful
                         ) {
-                            if (read.equals("R8100")){
-                                updateView(new Common(true,
-                                        "Your tag has low battery.",
-                                        mDateFormat.format(new Date())));
-                            }else if (read.equals("R0100")){
+                            String remove = epcCur.substring(1,25);
+                            epcCur = epcCur.replace(remove, "").replace("Q","");
+                            remove = epcCur.substring(8);
+                            epcCur = epcCur.replace(remove,"");
+
+                            if (readCur.equals("R8100") && !readPrev.equals(readCur)){
+                                    updateView(new Common(true,
+                                            epcCur,
+                                            mDateFormat.format(new Date())));
+
+                                    readPrev = readCur;
+
+                                    updateView(new Common(true,
+                                            "Your tag has low battery.",
+                                            mDateFormat.format(new Date())));
+                                    epcPrev = "";
+
+                            } else if (readCur.equals("R0100")){
                                 updateView(new Common(true,
                                         "Temperature reading was invalid. Please try again.",
                                         mDateFormat.format(new Date())));
+                                epcPrev = "";
+                                readPrev = "";
                             }
-                            else{
-                                epc = epc.replace("Q", "");
-                                updateView(new Common(true,
-                                        epc,
-                                        mDateFormat.format(new Date())));
+                            else if(!readCur.equals("R8100")){
+                                if(!epcCur.equals(epcPrev))
+                                {
+                                    updateView(new Common(true,
+                                            epcCur,
+                                            mDateFormat.format(new Date())));
 
-                                read = read.replace("R", "");
-                                tempRaw = Integer.parseInt(read, 16);
-                                tempConvert = tempRaw;
-                                tempConvert = tempConvert / 4;
-                                read = "Temperature: " + String.valueOf(tempConvert) + " C";
+                                    readCur = readCur.replace("R", "");
+                                    tempRaw = Integer.parseInt(readCur, 16);
+                                    tempConvert = tempRaw;
+                                    tempConvert = tempConvert / 4;
+                                    readCur = "Temperature: " + String.valueOf(tempConvert) + " C";
 
-                                readerID = readerID.replace("S","");
+                                    readerID = readerID.replace("S","");
 
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                datetime = sdf.format(new Date());
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                    datetime = sdf.format(new Date());
 
-                                createPost(epc,String.valueOf(tempConvert),readerID,datetime);
-                                updateView(new Common(true,
-                                        read,
-                                        mDateFormat.format(new Date())));
+                                    createPost(epcCur,String.valueOf(tempConvert),readerID,datetime);
+                                    updateView(new Common(true,
+                                            readCur,
+                                            mDateFormat.format(new Date())));
+                                    epcPrev = epcCur;
+                                    readPrev = "";
+                                }
 
                             }
-
 
                         }
                     }
@@ -374,7 +394,7 @@ public class CommonFragment extends Fragment {
                         write = s;
                     }
                     else if (s.contains("Q")){
-                        epc = s;
+                        epcCur = s;
                     }
                     else if (s.contains("S")){
                         readerID = s;
