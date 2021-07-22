@@ -35,15 +35,17 @@ import com.favepc.reader.service.OTGService;
 import com.favepc.reader.service.ReaderService;
 import com.favepc.reader.rfidreaderutility.ApiHolder;
 import com.favepc.reader.rfidreaderutility.TempData;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -99,6 +101,7 @@ public class CommonFragment extends Fragment {
     private String datetime;
 
     ApiHolder apiHolder;
+    String token = "Bearer cb5c185b0348c227ec2e32e00b41d7a99129a635c474f4278b4cd7c590eb8a1e71500585db23453d9b5a0974e449bcf6596589f05bc31add00b7089859388a06";
 
     public CommonFragment() {
         super();
@@ -129,15 +132,28 @@ public class CommonFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-//        Gson gson = new GsonBuilder()
-//                .setLenient()
-//                .create();
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
+            @Override
+            public okhttp3.Response intercept(Chain chain) throws IOException {
+                Request newRequest  = chain.request().newBuilder()
+                        .addHeader("Authorization", token)
+                        .build();
+                return chain.proceed(newRequest);
+            }
+        }).build();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.1.4:8000/")
+                .client(client)
+                .baseUrl("http://dbopayment.sparksoft.com.ph:4000/api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         apiHolder = retrofit.create(ApiHolder.class);
+
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .baseUrl("http://192.168.1.4:8000/")
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//        apiHolder = retrofit.create(ApiHolder.class);
     }
 
     @Nullable
@@ -294,9 +310,9 @@ public class CommonFragment extends Fragment {
         }
     }
 
-    private void createPost(String epcPost, String tempPost, String locationPost, String datetimePost) {
+    private void createPost(String epcPost, String tempPost, String locationPost) {
 
-        TempData tempData = new TempData(tempPost,epcPost, locationPost, datetimePost);
+        TempData tempData = new TempData(tempPost,epcPost, locationPost);
 
         Call<TempData> call = apiHolder.createPost(tempData);
 
@@ -334,6 +350,7 @@ public class CommonFragment extends Fragment {
                                 !readCur.equals("R")&& // checks if user memory reading was successful
                                 !epcCur.equals("Q")&&  // checks if EPC reading was successful
                                 !write.equals("W") // checks if writing to memory was successful
+                                && epcCur.length() > 8
                         ) {
                             String remove = epcCur.substring(1,25);
                             epcCur = epcCur.replace(remove, "").replace("Q","");
@@ -374,10 +391,10 @@ public class CommonFragment extends Fragment {
 
                                     readerID = readerID.replace("S","");
 
-                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                    datetime = sdf.format(new Date());
+//                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                                    datetime = sdf.format(new Date());
 
-                                    createPost(epcCur,String.valueOf(tempConvert),readerID,datetime);
+                                    createPost(epcCur,String.valueOf(tempConvert),readerID);
                                     updateView(new Common(true,
                                             readCur,
                                             mDateFormat.format(new Date())));
@@ -386,7 +403,6 @@ public class CommonFragment extends Fragment {
                                 }
 
                             }
-
                         }
                     }
 
