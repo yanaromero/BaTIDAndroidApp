@@ -142,18 +142,18 @@ public class CommonFragment extends Fragment {
             }
         }).build();
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl("http://dbopayment.sparksoft.com.ph:4000/api/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        apiHolder = retrofit.create(ApiHolder.class);
-
 //        Retrofit retrofit = new Retrofit.Builder()
-//                .baseUrl("http://192.168.1.4:8000/")
+//                .client(client)
+//                .baseUrl("http://dbopayment.sparksoft.com.ph:4000/api/")
 //                .addConverterFactory(GsonConverterFactory.create())
 //                .build();
 //        apiHolder = retrofit.create(ApiHolder.class);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.1.4:8000/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        apiHolder = retrofit.create(ApiHolder.class);
     }
 
     @Nullable
