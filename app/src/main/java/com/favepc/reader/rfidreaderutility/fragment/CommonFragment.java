@@ -23,6 +23,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.favepc.reader.rfidreaderutility.AppContext;
+import com.favepc.reader.rfidreaderutility.LocalDbHelper;
+import com.favepc.reader.rfidreaderutility.LocalTempModel;
 import com.favepc.reader.rfidreaderutility.MainActivity;
 import com.favepc.reader.rfidreaderutility.R;
 import com.favepc.reader.rfidreaderutility.adapter.CommonListAdapter;
@@ -98,7 +100,6 @@ public class CommonFragment extends Fragment {
     private String readPrev = "";
     private String readCur;
     private String readerID;
-    private String datetime;
 
     ApiHolder apiHolder;
     String token = "Bearer cb5c185b0348c227ec2e32e00b41d7a99129a635c474f4278b4cd7c590eb8a1e71500585db23453d9b5a0974e449bcf6596589f05bc31add00b7089859388a06";
@@ -310,8 +311,42 @@ public class CommonFragment extends Fragment {
         }
     }
 
-    private void createPost(String epcPost, String tempPost, String locationPost) {
+    private void addToLocalDb(String rfidNumber, String temperature, String location){
+        LocalTempModel localTempModel = null;
+        //generate current datetime
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String datetime = sdf.format(new Date());
+        try {
+            localTempModel = new LocalTempModel(-1,Integer.parseInt(rfidNumber),Double.parseDouble(temperature),location,datetime);
+            Log.d("addTolocalDb", localTempModel.toString());
+        } catch (Exception e){
+            Log.d("addToLocalDb", "Error creating temp data.");
+        }
 
+        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+        boolean success = localDbHelper.addOne(localTempModel);
+
+        Toast.makeText(getContext(), "Success= " + success, Toast.LENGTH_SHORT).show();
+    }
+
+    private void getFromLocalDb(){
+        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+
+        LocalTempModel localTempModel = localDbHelper.getOldestOne();
+        Toast.makeText(getContext(), localTempModel.toString(), Toast.LENGTH_SHORT).show();
+    }
+
+    private void deleteFromLocalDb(){
+        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+
+        boolean success = localDbHelper.deleteOldestOne();
+
+        Toast.makeText(getContext(), "Success= " + success, Toast.LENGTH_SHORT).show();
+    }
+    private void createPost(String epcPost, String tempPost, String locationPost) {
+//        addToLocalDb(epcPost,tempPost,locationPost);
+//        getFromLocalDb();
+        deleteFromLocalDb();
         TempData tempData = new TempData(tempPost,epcPost, locationPost);
 
         Call<TempData> call = apiHolder.createPost(tempData);
@@ -391,8 +426,6 @@ public class CommonFragment extends Fragment {
 
                                     readerID = readerID.replace("S","");
 
-//                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                                    datetime = sdf.format(new Date());
 
                                     createPost(epcCur,String.valueOf(tempConvert),readerID);
                                     updateView(new Common(true,
