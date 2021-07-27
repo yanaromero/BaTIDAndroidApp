@@ -326,45 +326,87 @@ public class CommonFragment extends Fragment {
         LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
         boolean success = localDbHelper.addOne(localTempModel);
 
-        Toast.makeText(getContext(), "Success= " + success, Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getContext(), "Success= " + success, Toast.LENGTH_SHORT).show();
     }
 
-    private void getFromLocalDb(){
+    private TempData getFromLocalDb(){
         LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
 
         LocalTempModel localTempModel = localDbHelper.getOldestOne();
-        Toast.makeText(getContext(), localTempModel.toString(), Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getContext(), localTempModel.toString(), Toast.LENGTH_SHORT).show();
+        TempData tempData = new TempData(
+                String.valueOf(localTempModel.getTemperature()),
+                String.valueOf(localTempModel.getRfidNumber()),
+                localTempModel.getLocation());
+        return tempData;
     }
 
-    private void deleteFromLocalDb(){
+    private boolean deleteFromLocalDb(){
         LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
 
         boolean success = localDbHelper.deleteOldestOne();
-
+//        boolean deleted = localDbHelper.deleteAll();
         Toast.makeText(getContext(), "Success= " + success, Toast.LENGTH_SHORT).show();
+        return success;
+    }
+
+    private boolean isNotEmpty(){
+        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+
+        return localDbHelper.notEmptyDb();
+    }
+
+    private int numEntries(){
+        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+
+        return localDbHelper.numberOfEntries();
     }
     private void createPost(String epcPost, String tempPost, String locationPost) {
-//        addToLocalDb(epcPost,tempPost,locationPost);
+
 //        getFromLocalDb();
-        deleteFromLocalDb();
-        TempData tempData = new TempData(tempPost,epcPost, locationPost);
+//        deleteFromLocalDb();
 
-        Call<TempData> call = apiHolder.createPost(tempData);
+//        TempData tempData = new TempData(tempPost,epcPost, locationPost);
+//        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+//
+//
+//        addToLocalDb(epcPost,tempPost,locationPost);
+//        TempData tempData = getFromLocalDb();
+//
+////        localDbHelper.deleteAll();
+//        deleteFromLocalDb();
+//        Log.d("tempDataPARSE", String.valueOf(isNotEmpty()));
 
-        call.enqueue(new Callback<TempData>() {
-            @Override
-            public void onResponse(Call<TempData> call, Response<TempData> response) {
-                if(!response.isSuccessful()){
-                    Log.d("TRACK", "onResponse: " + response.code());
+        addToLocalDb(epcPost,tempPost,locationPost);
+//        deleteFromLocalDb();
+        int i;
+        TempData tempData;
+        Call<TempData> call;
+
+        for (i = 0; i < numEntries(); i++) {
+            tempData = getFromLocalDb();
+
+            call = apiHolder.createPost(tempData);
+
+            call.enqueue(new Callback<TempData>() {
+                @Override
+                public void onResponse(Call<TempData> call, Response<TempData> response) {
+                    if (!response.isSuccessful()) {
+                        Log.d("TRACK", "onResponse: " + response.code());
+//                        deleteFromLocalDb();
+                    } else if (response.isSuccessful()) {
+//                        if(!deleteFromLocalDb()) i--;
+                        deleteFromLocalDb();
+                        Log.d("TRACK", "body response:" + response.body());
+                    }
                 }
-                Log.d("TRACK","body response:" + response.body());
-            }
 
-            @Override
-            public void onFailure(Call<TempData> call, Throwable throwable) {
-                Log.d("TRACK","Failure message:" + throwable.getMessage());
-            }
-        });
+                @Override
+                public void onFailure(Call<TempData> call, Throwable throwable) {
+                    Log.d("TRACK", "Failure message:" + throwable.getMessage());
+                }
+            });
+        }
 
     }
 

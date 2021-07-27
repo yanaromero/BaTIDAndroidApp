@@ -63,7 +63,7 @@ public class LocalDbHelper extends SQLiteOpenHelper {
                 " WHERE " + COLUMN_ID +
                 " = (SELECT MIN(" + COLUMN_ID + ") FROM " + TEMP_TABLE + ")";
 
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.getWritableDatabase();
 
         Cursor cursor = db.rawQuery(queryString, null);
 
@@ -89,12 +89,63 @@ public class LocalDbHelper extends SQLiteOpenHelper {
     public boolean deleteOldestOne (){
         //delete the oldest (lowest ID number entry)
 
-        //String queryString = "DELETE FROM " + TEMP_TABLE + " WHERE " + COLUMN_ID + " = (SELECT MIN(" + COLUMN_ID + ") FROM " + TEMP_TABLE + ")";
-        String queryString = "DELETE FROM TEMP_TABLE WHERE ID = (SELECT MIN(ID) FROM TEMP_TABLE)";
+//        String queryString = "DELETE FROM " + TEMP_TABLE + " WHERE " + COLUMN_ID + " = (SELECT MIN(" + COLUMN_ID + ") FROM " + TEMP_TABLE + ")";
+        SQLiteDatabase db = this.getWritableDatabase();
+//        Cursor cursor = db.rawQuery(queryString, null);
+//        cursor.moveToFirst();
+
+        Cursor cursor = db.query(TEMP_TABLE, null, null, null, null, null, null);
+
+        if(cursor.moveToFirst()) {
+            String rowId = cursor.getString(cursor.getColumnIndex(COLUMN_ID));
+
+            db.delete(TEMP_TABLE, COLUMN_ID + "=?", new String[]{rowId});
+        }
+
+        if (cursor.moveToFirst()){
+            cursor.close();
+            db.close();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    public boolean notEmptyDb (){
+        String queryString = "SELECT * FROM " + TEMP_TABLE;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(queryString, null);
+
+
+        if(cursor.getCount()>0){
+            cursor.close();
+            db.close();
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    public int numberOfEntries(){
+        String queryString = "SELECT * FROM " + TEMP_TABLE;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(queryString, null);
+        int count = cursor.getCount();
+        cursor.close();
+        db.close();
+        return count;
+    }
+
+    public boolean deleteAll (){
+        String queryString = "DELETE FROM " + TEMP_TABLE;
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(queryString, null);
 
         if (cursor.moveToFirst()){
+            cursor.close();
+            db.close();
             return true;
         }
         else {
