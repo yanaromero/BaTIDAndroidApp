@@ -19,6 +19,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -103,6 +105,7 @@ public class CommonFragment extends Fragment {
 
     ApiHolder apiHolder;
     String token = "Bearer cb5c185b0348c227ec2e32e00b41d7a99129a635c474f4278b4cd7c590eb8a1e71500585db23453d9b5a0974e449bcf6596589f05bc31add00b7089859388a06";
+    int delCounter;
 
     public CommonFragment() {
         super();
@@ -325,78 +328,46 @@ public class CommonFragment extends Fragment {
 
         LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
         boolean success = localDbHelper.addOne(localTempModel);
-
-//        Toast.makeText(getContext(), "Success= " + success, Toast.LENGTH_SHORT).show();
     }
 
-    private TempData getFromLocalDb(){
+    private List<LocalTempModel> getFromLocalDb(){
         LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
-
-        LocalTempModel localTempModel = localDbHelper.getOldestOne();
-//        Toast.makeText(getContext(), localTempModel.toString(), Toast.LENGTH_SHORT).show();
-        TempData tempData = new TempData(
-                String.valueOf(localTempModel.getTemperature()),
-                String.valueOf(localTempModel.getRfidNumber()),
-                localTempModel.getLocation());
-        return tempData;
+        List<LocalTempModel> localTempModels = localDbHelper.getAll();
+        return localTempModels;
     }
 
     private boolean deleteFromLocalDb(){
         LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
-
-        boolean success = localDbHelper.deleteOldestOne();
-//        boolean deleted = localDbHelper.deleteAll();
-        Toast.makeText(getContext(), "Success= " + success, Toast.LENGTH_SHORT).show();
+        boolean success = localDbHelper.deleteAll();
         return success;
     }
 
-    private boolean isNotEmpty(){
-        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
-
-        return localDbHelper.notEmptyDb();
-    }
-
-    private int numEntries(){
-        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
-
-        return localDbHelper.numberOfEntries();
-    }
     private void createPost(String epcPost, String tempPost, String locationPost) {
-
-//        getFromLocalDb();
-//        deleteFromLocalDb();
-
-//        TempData tempData = new TempData(tempPost,epcPost, locationPost);
-//        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
-//
-//
-//        addToLocalDb(epcPost,tempPost,locationPost);
-//        TempData tempData = getFromLocalDb();
-//
-////        localDbHelper.deleteAll();
-//        deleteFromLocalDb();
-//        Log.d("tempDataPARSE", String.valueOf(isNotEmpty()));
-
         addToLocalDb(epcPost,tempPost,locationPost);
-//        deleteFromLocalDb();
-        int i;
-        TempData tempData;
-        Call<TempData> call;
 
-        for (i = 0; i < numEntries(); i++) {
-            tempData = getFromLocalDb();
+        List<LocalTempModel> localTempModels = getFromLocalDb();
+        final int size = localTempModels.size();
+        delCounter = 0;
+        for (LocalTempModel each:localTempModels) {
 
-            call = apiHolder.createPost(tempData);
+            TempData tempData = new TempData(
+                    String.valueOf(each.getTemperature()),
+                    String.valueOf(each.getRfidNumber()),
+                    each.getLocation()
+            );
+
+            Call<TempData> call = apiHolder.createPost(tempData);
 
             call.enqueue(new Callback<TempData>() {
                 @Override
                 public void onResponse(Call<TempData> call, Response<TempData> response) {
                     if (!response.isSuccessful()) {
                         Log.d("TRACK", "onResponse: " + response.code());
-//                        deleteFromLocalDb();
                     } else if (response.isSuccessful()) {
-//                        if(!deleteFromLocalDb()) i--;
-                        deleteFromLocalDb();
+                       delCounter++;
+                       if(Objects.equals(delCounter, size)){
+                            deleteFromLocalDb();
+                       }
                         Log.d("TRACK", "body response:" + response.body());
                     }
                 }
@@ -407,7 +378,6 @@ public class CommonFragment extends Fragment {
                 }
             });
         }
-
     }
 
     private Handler mCommonHandler = new Handler() {

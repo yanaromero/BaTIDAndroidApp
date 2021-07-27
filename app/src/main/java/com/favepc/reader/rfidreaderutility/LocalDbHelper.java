@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LocalDbHelper extends SQLiteOpenHelper {
 
     public static final String COLUMN_ID = "ID";
@@ -55,87 +58,36 @@ public class LocalDbHelper extends SQLiteOpenHelper {
         }
     }
 
-    public LocalTempModel getOldestOne(){
+    public List<LocalTempModel> getAll(){
+        List<LocalTempModel> returnList = new ArrayList<>();
 
-        LocalTempModel returnLocalTempModel = new LocalTempModel();
+        String queryString = "SELECT * FROM " + TEMP_TABLE;
 
-        String queryString = "SELECT * FROM " + TEMP_TABLE +
-                " WHERE " + COLUMN_ID +
-                " = (SELECT MIN(" + COLUMN_ID + ") FROM " + TEMP_TABLE + ")";
+        SQLiteDatabase db = this.getReadableDatabase();
 
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        Cursor cursor = db.rawQuery(queryString, null);
-
-        //if results get the items to be sent to the cloud db
-        if(cursor.moveToFirst()){
-            int tagID = cursor.getInt(0);
-            int tagRfidNumber = cursor.getInt(1);
-            double tagTemperature = cursor.getDouble(2);
-            String tagLocation = cursor.getString(3);
-            String tagDateTime = cursor.getString(4);
-
-            returnLocalTempModel = new LocalTempModel(tagID,tagRfidNumber,tagTemperature,tagLocation,tagDateTime);
-        }else{
-            //failure do not do anything
-        }
-
-        cursor.close();
-        db.close();
-
-        return returnLocalTempModel;
-    }
-
-    public boolean deleteOldestOne (){
-        //delete the oldest (lowest ID number entry)
-
-//        String queryString = "DELETE FROM " + TEMP_TABLE + " WHERE " + COLUMN_ID + " = (SELECT MIN(" + COLUMN_ID + ") FROM " + TEMP_TABLE + ")";
-        SQLiteDatabase db = this.getWritableDatabase();
-//        Cursor cursor = db.rawQuery(queryString, null);
-//        cursor.moveToFirst();
-
-        Cursor cursor = db.query(TEMP_TABLE, null, null, null, null, null, null);
-
-        if(cursor.moveToFirst()) {
-            String rowId = cursor.getString(cursor.getColumnIndex(COLUMN_ID));
-
-            db.delete(TEMP_TABLE, COLUMN_ID + "=?", new String[]{rowId});
-        }
+        Cursor cursor = db.rawQuery(queryString,null);
 
         if (cursor.moveToFirst()){
-            cursor.close();
-            db.close();
-            return true;
+            //loop to result and add them to the list
+            do {
+                int tagID = cursor.getInt(0);
+                int tagRfidNumber = cursor.getInt(1);
+                double tagTemperature = cursor.getDouble(2);
+                String tagLocation = cursor.getString(3);
+                String tagDateTime = cursor.getString(4);
+
+                LocalTempModel newLocalTempModel = new LocalTempModel(tagID,tagRfidNumber,tagTemperature,tagLocation,tagDateTime);
+                returnList.add(newLocalTempModel);
+            } while (cursor.moveToNext());
         }
         else {
-            return false;
+            // do nothing if empty
         }
-    }
 
-    public boolean notEmptyDb (){
-        String queryString = "SELECT * FROM " + TEMP_TABLE;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(queryString, null);
-
-
-        if(cursor.getCount()>0){
-            cursor.close();
-            db.close();
-            return true;
-        }
-        else{
-            return false;
-        }
-    }
-
-    public int numberOfEntries(){
-        String queryString = "SELECT * FROM " + TEMP_TABLE;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(queryString, null);
-        int count = cursor.getCount();
         cursor.close();
         db.close();
-        return count;
+
+        return returnList;
     }
 
     public boolean deleteAll (){
