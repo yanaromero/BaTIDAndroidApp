@@ -104,4 +104,18 @@ public class LocalDbHelper extends SQLiteOpenHelper {
             return false;
         }
     }
+
+    public boolean deleteOne (int id){
+        String queryString = "DELETE FROM " + TEMP_TABLE + " WHERE " + COLUMN_ID + " = " + String.valueOf(id);
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(queryString, null);
+        if (cursor.moveToFirst()){
+            cursor.close();
+            db.close();
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
 }

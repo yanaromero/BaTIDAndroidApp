@@ -105,7 +105,6 @@ public class CommonFragment extends Fragment {
 
     ApiHolder apiHolder;
     String token = "Bearer cb5c185b0348c227ec2e32e00b41d7a99129a635c474f4278b4cd7c590eb8a1e71500585db23453d9b5a0974e449bcf6596589f05bc31add00b7089859388a06";
-    int delCounter;
 
     public CommonFragment() {
         super();
@@ -144,7 +143,7 @@ public class CommonFragment extends Fragment {
                         .build();
                 return chain.proceed(newRequest);
             }
-        }).build();
+        }).retryOnConnectionFailure(false).build();
 
 //        Retrofit retrofit = new Retrofit.Builder()
 //                .client(client)
@@ -154,6 +153,7 @@ public class CommonFragment extends Fragment {
 //        apiHolder = retrofit.create(ApiHolder.class);
 
         Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
                 .baseUrl("http://192.168.1.4:8000/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -336,9 +336,10 @@ public class CommonFragment extends Fragment {
         return localTempModels;
     }
 
-    private boolean deleteFromLocalDb(){
+    private boolean deleteFromLocalDb(int id){
         LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
-        boolean success = localDbHelper.deleteAll();
+//        boolean success = localDbHelper.deleteAll();
+        boolean success = localDbHelper.deleteOne(id);
         return success;
     }
 
@@ -347,7 +348,9 @@ public class CommonFragment extends Fragment {
 
         List<LocalTempModel> localTempModels = getFromLocalDb();
         final int size = localTempModels.size();
-        delCounter = 0;
+        final List<Integer> delId= new ArrayList<Integer>();
+
+
         for (LocalTempModel each:localTempModels) {
 
             TempData tempData = new TempData(
@@ -355,6 +358,11 @@ public class CommonFragment extends Fragment {
                     String.valueOf(each.getRfidNumber()),
                     each.getLocation()
             );
+            delId.add(each.getId());
+
+
+            Log.d("LIST OF DEL ID:", "createPost: " + delId);
+
 
             Call<TempData> call = apiHolder.createPost(tempData);
 
@@ -362,12 +370,13 @@ public class CommonFragment extends Fragment {
                 @Override
                 public void onResponse(Call<TempData> call, Response<TempData> response) {
                     if (!response.isSuccessful()) {
+                        if (!call.isCanceled()) {
+                            call.cancel();
+                        }
                         Log.d("TRACK", "onResponse: " + response.code());
                     } else if (response.isSuccessful()) {
-                       delCounter++;
-                       if(Objects.equals(delCounter, size)){
-                            deleteFromLocalDb();
-                       }
+                        deleteFromLocalDb(delId.get(0));
+                        delId.remove(0);
                         Log.d("TRACK", "body response:" + response.body());
                     }
                 }
@@ -375,6 +384,9 @@ public class CommonFragment extends Fragment {
                 @Override
                 public void onFailure(Call<TempData> call, Throwable throwable) {
                     Log.d("TRACK", "Failure message:" + throwable.getMessage());
+                    if (!call.isCanceled()) {
+                        call.cancel();
+                    }
                 }
             });
         }
