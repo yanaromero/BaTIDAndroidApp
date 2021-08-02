@@ -330,53 +330,51 @@ public class CommonFragment extends Fragment {
         boolean success = localDbHelper.addOne(localTempModel);
     }
 
-    private List<LocalTempModel> getFromLocalDb(){
+//    private List<LocalTempModel> getFromLocalDb(){
+    private LocalTempModel getFromLocalDb(){
         LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
-        List<LocalTempModel> localTempModels = localDbHelper.getAll();
-        return localTempModels;
+//        List<LocalTempModel> localTempModels = localDbHelper.getAll();
+//        return localTempModels;
+
+        LocalTempModel localTempModel = localDbHelper.getFirstEntry();
+        return localTempModel;
     }
 
-    private boolean deleteFromLocalDb(int id){
+    private boolean deleteFromLocalDb(){
+//    private boolean deleteFromLocalDb(int id){
         LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
 //        boolean success = localDbHelper.deleteAll();
-        boolean success = localDbHelper.deleteOne(id);
+//        boolean success = localDbHelper.deleteOne(id);
+        boolean success = localDbHelper.deleteFirstEntry();
         return success;
     }
 
-    private void createPost(String epcPost, String tempPost, String locationPost) {
-        addToLocalDb(epcPost,tempPost,locationPost);
+    private void sendToRemote(){
+        LocalTempModel localTempModel = getFromLocalDb();
+        deleteFromLocalDb();
+//        delId.remove(0);
 
-        List<LocalTempModel> localTempModels = getFromLocalDb();
-        final int size = localTempModels.size();
-        final List<Integer> delId= new ArrayList<Integer>();
-
-
-        for (LocalTempModel each:localTempModels) {
-
-            TempData tempData = new TempData(
-                    String.valueOf(each.getTemperature()),
-                    String.valueOf(each.getRfidNumber()),
-                    each.getLocation()
+        if (localTempModel != null) {
+            final TempData tempData = new TempData(
+                    String.valueOf(localTempModel.getTemperature()),
+                    String.valueOf(localTempModel.getRfidNumber()),
+                    localTempModel.getLocation()
             );
-            delId.add(each.getId());
-
-
-            Log.d("LIST OF DEL ID:", "createPost: " + delId);
-
+//            final List<Integer> delId = new ArrayList<>();
+//            delId.add(localTempModel.getId());
 
             Call<TempData> call = apiHolder.createPost(tempData);
-
+            Log.d("CALL FORMAT", "sendToRemote: " + call);
             call.enqueue(new Callback<TempData>() {
                 @Override
                 public void onResponse(Call<TempData> call, Response<TempData> response) {
                     if (!response.isSuccessful()) {
-                        if (!call.isCanceled()) {
-                            call.cancel();
-                        }
                         Log.d("TRACK", "onResponse: " + response.code());
+                        addToLocalDb(String.valueOf(tempData.getRfidNumber()),
+                                String.valueOf(tempData.getTemperature()),
+                                tempData.getLocation());
                     } else if (response.isSuccessful()) {
-                        deleteFromLocalDb(delId.get(0));
-                        delId.remove(0);
+                        sendToRemote();
                         Log.d("TRACK", "body response:" + response.body());
                     }
                 }
@@ -384,12 +382,17 @@ public class CommonFragment extends Fragment {
                 @Override
                 public void onFailure(Call<TempData> call, Throwable throwable) {
                     Log.d("TRACK", "Failure message:" + throwable.getMessage());
-                    if (!call.isCanceled()) {
-                        call.cancel();
-                    }
+                    addToLocalDb(String.valueOf(tempData.getRfidNumber()),
+                            String.valueOf(tempData.getTemperature()),
+                            tempData.getLocation());
                 }
             });
         }
+    }
+
+    private void createPost(String epcPost, String tempPost, String locationPost) {
+        addToLocalDb(epcPost,tempPost,locationPost);
+        sendToRemote();
     }
 
     private Handler mCommonHandler = new Handler() {

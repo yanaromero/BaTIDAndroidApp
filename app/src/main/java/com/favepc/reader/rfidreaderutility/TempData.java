@@ -16,4 +16,27 @@ public class TempData {
 //        this.datetime = datetime;
     }
 
+    public String getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(String temperature) {
+        this.temperature = temperature;
+    }
+
+    public String getRfidNumber() {
+        return rfidNumber;
+    }
+
+    public void setRfidNumber(String rfidNumber) {
+        this.rfidNumber = rfidNumber;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
 }

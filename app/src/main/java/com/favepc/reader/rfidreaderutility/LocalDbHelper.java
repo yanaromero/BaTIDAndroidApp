@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +91,24 @@ public class LocalDbHelper extends SQLiteOpenHelper {
         return returnList;
     }
 
+    public LocalTempModel getFirstEntry(){
+        String queryString = "SELECT * FROM " + TEMP_TABLE + " WHERE " + COLUMN_ID + " = ( SELECT MIN("+ COLUMN_ID + ") FROM " + TEMP_TABLE + ")";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(queryString, null);
+
+        LocalTempModel returnTempModel = null;
+        if(cursor.moveToFirst()){
+            int tagID = cursor.getInt(0);
+            int tagRfidNumber = cursor.getInt(1);
+            double tagTemperature = cursor.getDouble(2);
+            String tagLocation = cursor.getString(3);
+            String tagDateTime = cursor.getString(4);
+
+            returnTempModel = new LocalTempModel(tagID,tagRfidNumber,tagTemperature,tagLocation,tagDateTime);
+        }
+        return returnTempModel;
+    }
+
     public boolean deleteAll (){
         String queryString = "DELETE FROM " + TEMP_TABLE;
         SQLiteDatabase db = this.getWritableDatabase();
@@ -105,8 +124,24 @@ public class LocalDbHelper extends SQLiteOpenHelper {
         }
     }
 
+    public boolean deleteFirstEntry(){
+        String queryString = "DELETE FROM " + TEMP_TABLE + " WHERE " + COLUMN_ID + " = ( SELECT MIN("+ COLUMN_ID + ") FROM " + TEMP_TABLE + ")";
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(queryString, null);
+
+        if(cursor.moveToFirst()){
+            cursor.close();
+            db.close();
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
     public boolean deleteOne (int id){
         String queryString = "DELETE FROM " + TEMP_TABLE + " WHERE " + COLUMN_ID + " = " + String.valueOf(id);
+        Log.d("DELETE QUERY", "deleteOne: " + queryString);
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(queryString, null);
         if (cursor.moveToFirst()){
