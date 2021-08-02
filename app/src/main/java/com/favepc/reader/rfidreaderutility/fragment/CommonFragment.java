@@ -143,21 +143,21 @@ public class CommonFragment extends Fragment {
                         .build();
                 return chain.proceed(newRequest);
             }
-        }).retryOnConnectionFailure(false).build();
-
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .client(client)
-//                .baseUrl("http://dbopayment.sparksoft.com.ph:4000/api/")
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//        apiHolder = retrofit.create(ApiHolder.class);
+        }).build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl("http://192.168.1.4:8000/")
+                .baseUrl("http://dbopayment.sparksoft.com.ph:4000/api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         apiHolder = retrofit.create(ApiHolder.class);
+//
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .client(client)
+//                .baseUrl("http://192.168.1.4:8000/")
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//        apiHolder = retrofit.create(ApiHolder.class);
     }
 
     @Nullable
@@ -355,21 +355,26 @@ public class CommonFragment extends Fragment {
 //        delId.remove(0);
 
         if (localTempModel != null) {
+
             final TempData tempData = new TempData(
                     String.valueOf(localTempModel.getTemperature()),
                     String.valueOf(localTempModel.getRfidNumber()),
-                    localTempModel.getLocation()
+                    localTempModel.getLocation(),
+                    localTempModel.getDatetime()
             );
 //            final List<Integer> delId = new ArrayList<>();
 //            delId.add(localTempModel.getId());
+            Log.d("TEMPDATA CONTAINS: ", String.valueOf(tempData));
 
             Call<TempData> call = apiHolder.createPost(tempData);
+
             Log.d("CALL FORMAT", "sendToRemote: " + call);
+
             call.enqueue(new Callback<TempData>() {
                 @Override
                 public void onResponse(Call<TempData> call, Response<TempData> response) {
                     if (!response.isSuccessful()) {
-                        Log.d("TRACK", "onResponse: " + response.code());
+                        Log.d("TRACK", "onResponse: " + response.code() + response);
                         addToLocalDb(String.valueOf(tempData.getRfidNumber()),
                                 String.valueOf(tempData.getTemperature()),
                                 tempData.getLocation());

@@ -10,10 +10,10 @@ import retrofit2.http.Query;
 
 public interface ApiHolder {
 
-//    @POST("new")
-//    Call<TempData> createPost(@Body TempData body);
-
-    @POST("create.php")
+    @POST("new")
     Call<TempData> createPost(@Body TempData body);
-    
+
+//    @POST("create.php")
+//    Call<TempData> createPost(@Body TempData body);
+//
 }
