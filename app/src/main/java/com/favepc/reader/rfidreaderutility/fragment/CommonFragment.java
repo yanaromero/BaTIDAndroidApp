@@ -41,11 +41,15 @@ import com.favepc.reader.rfidreaderutility.ApiHolder;
 import com.favepc.reader.rfidreaderutility.TempData;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import okhttp3.Interceptor;
@@ -375,7 +379,19 @@ public class CommonFragment extends Fragment {
             call.enqueue(new Callback<TempData>() {
                 @Override
                 public void onResponse(Call<TempData> call, Response<TempData> response) {
-                    if (!response.isSuccessful()) {
+                    if(
+                            response.body().getDatetime().replace("T"," ").replace(".000Z","").equals(tempData.getDatetime()) &&
+                            response.body().getLocation().equals(tempData.getLocation()) &&
+                            response.body().getRfidNumber().equals(tempData.getRfidNumber()) &&
+                            response.body().getTemperature().equals(tempData.getTemperature())
+                    ) {
+                        //call sendToRemote() function again for queued entries in local database
+                        successSound.start();
+                        sendToRemote();
+                        Log.d("TESTING", response.body().getTemperature());
+                        Log.d("RESPONSE", "onResponse: " + response.code() + response);
+                    }
+                    else{
                         //if response code is not successful play fail sound and add back to the local database
                         failSound.start();
                         addToLocalDb(String.valueOf(tempData.getRfidNumber()),
@@ -383,14 +399,8 @@ public class CommonFragment extends Fragment {
                                 tempData.getLocation(),
                                 tempData.getDatetime());
                         Log.d("TRACK", "onResponse: " + response.code() + response);
-
-                    } else if (response.isSuccessful()) {
-                        //if response code is successful play success sound and
-                        //call sendToRemote() function again for queued entries in local database
-                        successSound.start();
-                        sendToRemote();
-                        Log.d("RESPONSE", "onResponse: " + response.code() + response);
                     }
+
                 }
 
                 @Override
