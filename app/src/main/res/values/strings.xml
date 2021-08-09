@@ -12,11 +12,13 @@
 
     <string name="menu_item_common">Common(Q,T,P,R,W,L,K)</string>
     <string name="menu_item_otg">OTG</string>
+    <string name="menu_item_about">OTG</string>
 
     <!-- Toolbar titles when navigation menu item is selected -->
     <string-array name="nav_item_activity_titles">
         <item>OTG</item>
         <item>Common(Q,T,P,R,W,L,K)</item>
+        <item>About</item>
     </string-array>
 
     <!-- fragment_demo -->
@@ -127,10 +129,10 @@
         <item>1:Continue</item>
     </string-array>
     <string-array name="common_memory_bank">
-<!--        <item>Reserved</item>-->
-<!--        <item>EPC</item>-->
-<!--        <item>TID</item>-->
-<!--        <item>USER</item> -->
+        <!--        <item>Reserved</item>-->
+        <!--        <item>EPC</item>-->
+        <!--        <item>TID</item>-->
+        <!--        <item>USER</item> -->
         <item>USER</item>
         <item>EPC</item>
         <item>TID</item>

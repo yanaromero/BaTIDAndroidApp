@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity
     public static final String TAG_CI_UNLINK = "UNLINK";
     private static String NAV_CURRENT_TAG = TAG_DEMO;
     private static String COMMUNICATION_INTERFACE = TAG_CI_UNLINK;
+    public static final String TAG_ABOUT = "About";
 
     private AppContext mAppContext;
     private Handler mHandler;
@@ -167,6 +168,11 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_ci_otg:
                 navItemIndex = 0;
                 NAV_CURRENT_TAG = TAG_CI_OTG;
+            case R.id.nav_about:
+                navItemIndex = 2;
+                NAV_CURRENT_TAG = TAG_ABOUT;
+                Intent intent = new Intent(this, About.class);
+                startActivity(intent);
                 break;
 
         }
