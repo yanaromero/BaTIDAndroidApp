@@ -20,7 +20,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -33,7 +32,6 @@ import com.favepc.reader.rfidreaderutility.adapter.CommonListAdapter;
 import com.favepc.reader.rfidreaderutility.adapter.CommonPageAdapter;
 import com.favepc.reader.rfidreaderutility.adapter.WrapContentViewPager;
 import com.favepc.reader.rfidreaderutility.object.Common;
-import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
 import com.favepc.reader.rfidreaderutility.pager.CommonReadPage;
 import com.favepc.reader.service.OTGService;
 import com.favepc.reader.service.ReaderService;
@@ -41,16 +39,11 @@ import com.favepc.reader.rfidreaderutility.ApiHolder;
 import com.favepc.reader.rfidreaderutility.TempData;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -99,7 +92,6 @@ public class CommonFragment extends Fragment {
     private byte[] mProcess;
     private ArrayList<HashMap<String, String>> mProcessList;
     private SimpleDateFormat mDateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-    private CustomKeyboardManager mCustomKeyboardManager;
 
     private String epcPrev;
     private String epcCur;
@@ -127,7 +119,6 @@ public class CommonFragment extends Fragment {
         super.onAttach(context);
         this.mContext = context;
         this.mAppContext = (AppContext) context.getApplicationContext();
-        this.mCustomKeyboardManager = this.mAppContext.getKeyboard();
         this.mActivity = getActivity();
         this.mAppContext = (AppContext) context.getApplicationContext();
         this.mReaderService = new ReaderService();
@@ -194,7 +185,7 @@ public class CommonFragment extends Fragment {
                 public void run() {
                     //create pager: epc,tid, read, write
                     {
-                        mCommonReadPage = new CommonReadPage(mContext, mActivity, mLayoutInflater, mReaderService, mCustomKeyboardManager);
+                        mCommonReadPage = new CommonReadPage(mContext, mActivity, mLayoutInflater, mReaderService);
                     }
                     //add page view
                     {

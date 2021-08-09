@@ -25,12 +25,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.favepc.reader.rfidreaderutility.fragment.CommonFragment;
-//import com.favepc.reader.rfidreaderutility.fragment.DemoIRFragment;
-//import com.favepc.reader.rfidreaderutility.fragment.DemoUFragment;
-//import com.favepc.reader.rfidreaderutility.fragment.DemoURFragment;
 import com.favepc.reader.rfidreaderutility.fragment.OTGFragment;
-//import com.favepc.reader.rfidreaderutility.fragment.RegularFragment;
-import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
 import com.favepc.reader.service.BluetoothService;
 import com.favepc.reader.service.NetService;
 import com.favepc.reader.service.OTGService;
@@ -64,8 +59,6 @@ public class MainActivity extends AppCompatActivity
     private Fragment mCurrentFragment, mOldFragment;
     private NotificationReceiver mNotificationReceiver;
     private int mConnectStatus = 0; //otg = 1; ble = 2; wifi = 4;
-
-    private CustomKeyboardManager mKeyboardManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,9 +112,7 @@ public class MainActivity extends AppCompatActivity
             navigateToFragment();
         }
 
-        this.mKeyboardManager = new CustomKeyboardManager(this);
         this.mAppContext = (AppContext) this.getApplicationContext();
-        this.mAppContext.setKeyboard(this.mKeyboardManager);
     }
 
 

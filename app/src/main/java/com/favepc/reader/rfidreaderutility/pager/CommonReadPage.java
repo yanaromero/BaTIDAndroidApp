@@ -15,8 +15,6 @@ import android.widget.Toast;
 import com.favepc.reader.rfidreaderutility.AppContext;
 import com.favepc.reader.rfidreaderutility.MainActivity;
 import com.favepc.reader.rfidreaderutility.R;
-import com.favepc.reader.rfidreaderutility.object.CustomBaseKeyboard;
-import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
 import com.favepc.reader.service.ReaderService;
 
 import java.util.ArrayList;
@@ -43,8 +41,6 @@ public class CommonReadPage {
 
     private Drawable        mDrawableOK, mDrawableError;
     private Button          mButton;
-    private CustomKeyboardManager mCustomKeyboardManager;
-    private CustomBaseKeyboard HexKeyboard;
     private ArrayList<HashMap<String, String>> mProcessList;
     private ReaderService mReaderService;
 
@@ -53,12 +49,11 @@ public class CommonReadPage {
 
     private boolean 		    mRunningFlag = false;
 
-    public CommonReadPage(Context context, Activity act, LayoutInflater inflater, ReaderService rs, CustomKeyboardManager ckm) {
+    public CommonReadPage(Context context, Activity act, LayoutInflater inflater, ReaderService rs) {
         this.mContext = context;
         this.mActivity = act;
         this.mInflater = inflater;
         this.mReaderService = rs;
-        this.mCustomKeyboardManager = ckm;
         this.mAppContext = (AppContext) context.getApplicationContext();
 
         this.mProcessList = new ArrayList<>();
