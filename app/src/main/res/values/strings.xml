@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RFID Reader Utility</string>
+    <string name="app_name">BaTID Reader App</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -7,12 +7,12 @@
     <string name="action_settings">Settings</string>
     <string name="menu_clear">Clear</string>
 
-    <string name="nav_header_name">Reader Utility</string>
-    <string name="nav_header_version">v2.2  2018/7/20</string>
+    <string name="nav_header_name">BaTID Reader App</string>
+    <string name="nav_header_version">v1.0 August 2021</string>
 
     <string name="menu_item_common">Common(Q,T,P,R,W,L,K)</string>
     <string name="menu_item_otg">OTG</string>
-    <string name="menu_item_about">OTG</string>
+    <string name="menu_item_about">About</string>
 
     <!-- Toolbar titles when navigation menu item is selected -->
     <string-array name="nav_item_activity_titles">
@@ -179,4 +179,17 @@
     <string name="regular_power_title">Set Power(dBm):</string>
     <string name="regular_action_update">Update</string>
     <string name="regular_action_power_set">Set</string>
+
+    <!-- about -->
+    <string name="about_title">About</string>
+    <string name="about_info">This application was made as part of a temperature identification system.</string>
+    <string name="about_team_header"> Team Members </string>
+    <string-array name="team_members">
+        <item>Diana Romero</item>
+        <item>Fatimah Nasra Hamoy</item>
+        <item>Dr. Erwin Enriquez</item>
+        <item>Dr. Lea Macaraig</item>
+    </string-array>
+    <string name="about_partners">This project was conducted in partnership with <b>Sparksoft Technologies</b> and funded by the <b>Department of Science and Technology.</b></string>
+    <string name="about_resources">Sound resources used in this application have been downloaded from the <b>Material Design</b> website (<u>material.io</u>)</string>
 </resources>

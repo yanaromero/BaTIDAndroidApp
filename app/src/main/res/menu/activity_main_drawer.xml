@@ -12,6 +12,7 @@
         <item
             android:id="@+id/nav_about"
             android:icon="@mipmap/ic_demo_black_48dp"
-            android:title="@string/menu_item_about" />
+            android:title="@string/menu_item_about"
+            android:checkable="false"/>
     </group>
 </menu>

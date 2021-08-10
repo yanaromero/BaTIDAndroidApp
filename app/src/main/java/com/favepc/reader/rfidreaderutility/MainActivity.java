@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity
 
         if (savedInstanceState == null) {
             navItemIndex = 0;
-            NAV_CURRENT_TAG = TAG_DEMO;
+            NAV_CURRENT_TAG = TAG_CI_OTG;
             navigateToFragment();
         }
 
@@ -153,7 +153,9 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
-
+        if (id == R.id.nav_about){
+            return false;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -168,9 +170,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_ci_otg:
                 navItemIndex = 0;
                 NAV_CURRENT_TAG = TAG_CI_OTG;
+                break;
             case R.id.nav_about:
-                navItemIndex = 2;
-                NAV_CURRENT_TAG = TAG_ABOUT;
+//                NAV_CURRENT_TAG = TAG_ABOUT;
                 Intent intent = new Intent(this, About.class);
                 startActivity(intent);
                 break;
@@ -180,12 +182,14 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
 
-        if (item.isChecked()) {
+        if (item.getItemId() != R.id.nav_about && item.isChecked()) {
             item.setChecked(false);
         } else {
             item.setChecked(true);
         }
-        item.setChecked(true);
+        if (item.getItemId() != R.id.nav_about) {
+            item.setChecked(true);
+        }
 
         navigateToFragment();
 
@@ -198,7 +202,8 @@ public class MainActivity extends AppCompatActivity
      */
     private void navigateToFragment() {
         // selecting appropriate nav menu item
-        this.navigationView.getMenu().getItem(navItemIndex).setChecked(true);
+//        this.navigationView.getMenu().getItem(navItemIndex).setChecked(true);
+
         // set toolbar title
         getSupportActionBar().setTitle(activityTitles[navItemIndex]);
 
@@ -232,6 +237,7 @@ public class MainActivity extends AppCompatActivity
             toggleFab();
 
             drawerLayout.closeDrawers();
+            invalidateOptionsMenu();
             return;
         }
 
@@ -297,6 +303,8 @@ public class MainActivity extends AppCompatActivity
             case 1:
                 CommonFragment commonFragment = new CommonFragment(this, this);
                 return commonFragment;
+            case 2:
+                return null;
             default:
                 return new OTGFragment(this, this);
         }
