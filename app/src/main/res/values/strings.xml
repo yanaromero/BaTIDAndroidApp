@@ -191,5 +191,5 @@
         <item>Dr. Lea Macaraig</item>
     </string-array>
     <string name="about_partners">This project was conducted in partnership with <b>Sparksoft Technologies</b> and funded by the <b>Department of Science and Technology.</b></string>
-    <string name="about_resources">Sound resources used in this application have been downloaded from the <b>Material Design</b> website (<u>material.io</u>)</string>
+    <string name="about_resources">Sound resources used in this application have been downloaded from the <b>Material Design</b> website (<a href = "material.io">material.io</a>)</string>
 </resources>
