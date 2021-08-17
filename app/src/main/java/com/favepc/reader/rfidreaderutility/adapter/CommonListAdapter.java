@@ -44,19 +44,9 @@ public class CommonListAdapter extends ArrayAdapter<Common> {
             _layout = (RelativeLayout)convertView;
         }
 
-        TextView _tvTx = (TextView) _layout.findViewById(R.id.adapter_common_tx);
-        TextView _tvRx = (TextView) _layout.findViewById(R.id.adapter_common_rx);
         TextView _tvData = (TextView) _layout.findViewById(R.id.adapter_common_data);
         TextView _tvTime = (TextView) _layout.findViewById(R.id.adapter_common_time);
 
-        if (_common.Title()) {
-            _tvTx.setVisibility(View.INVISIBLE);
-            _tvRx.setVisibility(View.VISIBLE);
-        }
-        else {
-            _tvTx.setVisibility(View.VISIBLE);
-            _tvRx.setVisibility(View.INVISIBLE);
-        }
         _tvData.setText(_common.Data());
         _tvTime.setText(_common.Time());
 

@@ -10,14 +10,14 @@
     <string name="nav_header_name">BaTID Reader App</string>
     <string name="nav_header_version">v1.0 August 2021</string>
 
-    <string name="menu_item_common">Common(Q,T,P,R,W,L,K)</string>
-    <string name="menu_item_otg">OTG</string>
+    <string name="menu_item_common">Read Tags</string>
+    <string name="menu_item_otg">Connect Reader</string>
     <string name="menu_item_about">About</string>
 
     <!-- Toolbar titles when navigation menu item is selected -->
     <string-array name="nav_item_activity_titles">
-        <item>OTG</item>
-        <item>Common(Q,T,P,R,W,L,K)</item>
+        <item>Connect Reader</item>
+        <item>Read Tags</item>
         <item>About</item>
     </string-array>
 
@@ -73,13 +73,13 @@
     <string name="ble_handheld_set">設定</string>
 
     <!-- fragment_otg -->
-    <string name="otg_action_enumerate">Enumerate</string>
+    <string name="otg_action_enumerate">Find reader</string>
     <string name="otg_msg_support"> does support USB host</string>
     <string name="otg_msg_no_support"> does not support USB host</string>
     <string name="otg_msg_driver_no_support">driver not support this device.</string>
-    <string name="otg_msg_start_enumerate">Start enumerate devices, Please wait...</string>
-    <string name="otg_msg_stop_enumerate">Stop enumerate devices.</string>
-    <string name="otg_msg_stop_enumerate_no_device">Stop enumerate and no found device.</string>
+    <string name="otg_msg_start_enumerate">Searching for reader, Please wait...</string>
+    <string name="otg_msg_stop_enumerate">Found readers listed.</string>
+    <string name="otg_msg_stop_enumerate_no_device">No found device.</string>
     <string name="otg_msg_stop_service">Stop OTG service.</string>
     <string name="otg_adapter_vendorId_title">VID:</string>
     <string name="otg_adapter_productId_title">PID:</string>
