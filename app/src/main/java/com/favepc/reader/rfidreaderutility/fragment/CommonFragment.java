@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.favepc.reader.rfidreaderutility.AppContext;
@@ -106,6 +107,7 @@ public class CommonFragment extends Fragment {
     MediaPlayer successSound;
     MediaPlayer failSound;
     MediaPlayer localDbSound;
+    ProgressBar sendingProgressBar;
 
     public CommonFragment() {
         super();
@@ -150,7 +152,7 @@ public class CommonFragment extends Fragment {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl("http://dbopayment.sparksoft.com.ph:4000/api/")
+                .baseUrl("https://dbopayment.sparksoft.com.ph:4000/api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         apiHolder = retrofit.create(ApiHolder.class);
@@ -180,9 +182,9 @@ public class CommonFragment extends Fragment {
             this.mCommonListAdapter = new CommonListAdapter(this.mContext, R.layout.adapter_common, this.mCommons);
             ListView lv = (ListView)this.mCommonView.findViewById(R.id.common_lvMsg);
             lv.setAdapter(this.mCommonListAdapter);
+            sendingProgressBar = (ProgressBar) mCommonView.findViewById(R.id.sending_progress_bar);
 
-
-            Runnable mPendingRunnable = new Runnable() {
+                    Runnable mPendingRunnable = new Runnable() {
                 @Override
                 public void run() {
                     //create pager: epc,tid, read, write
@@ -351,8 +353,15 @@ public class CommonFragment extends Fragment {
         boolean success = localDbHelper.deleteFirstEntry();
         return success;
     }
+    private boolean containsQueue(){
+        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+        int entriesCount = localDbHelper.countEntries();
+        if(entriesCount > 0) return true;
+        else return false;
+    }
 
     private void sendToRemote(){
+//        sendingProgressBar.setVisibility(View.VISIBLE);
         LocalTempModel localTempModel = getFromLocalDb();
         deleteFromLocalDb();
 
