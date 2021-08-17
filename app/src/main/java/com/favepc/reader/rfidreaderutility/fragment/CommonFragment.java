@@ -105,6 +105,7 @@ public class CommonFragment extends Fragment {
 
     MediaPlayer successSound;
     MediaPlayer failSound;
+    MediaPlayer localDbSound;
 
     public CommonFragment() {
         super();
@@ -164,6 +165,7 @@ public class CommonFragment extends Fragment {
         //initialize application sounds
         successSound = MediaPlayer.create(getContext(), R.raw.success);
         failSound = MediaPlayer.create(getContext(), R.raw.fail);
+        localDbSound = MediaPlayer.create(getContext(), R.raw.local_db);
 
     }
 
@@ -379,8 +381,6 @@ public class CommonFragment extends Fragment {
                         //call sendToRemote() function again for queued entries in local database
                         successSound.start();
                         sendToRemote();
-                        Log.d("TESTING", response.body().getTemperature());
-                        Log.d("RESPONSE", "onResponse: " + response.code() + response);
                     }
                     else{
                         //if response code is not successful play fail sound and add back to the local database
