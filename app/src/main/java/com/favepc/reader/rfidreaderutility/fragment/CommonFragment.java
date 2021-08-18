@@ -21,6 +21,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.favepc.reader.rfidreaderutility.AppContext;
@@ -106,6 +108,8 @@ public class CommonFragment extends Fragment {
     MediaPlayer successSound;
     MediaPlayer failSound;
     MediaPlayer localDbSound;
+    ProgressBar sendingProgress;
+    TextView textProgress;
 
     public CommonFragment() {
         super();
@@ -179,6 +183,8 @@ public class CommonFragment extends Fragment {
 
             this.mCommonListAdapter = new CommonListAdapter(this.mContext, R.layout.adapter_common, this.mCommons);
             ListView lv = (ListView)this.mCommonView.findViewById(R.id.common_lvMsg);
+            sendingProgress = (ProgressBar) mCommonView.findViewById(R.id.sending_progress_bar);
+            textProgress = (TextView)mCommonView.findViewById(R.id.progress_textView);
             lv.setAdapter(this.mCommonListAdapter);
 
 
@@ -352,6 +358,14 @@ public class CommonFragment extends Fragment {
         return success;
     }
 
+    private boolean containsQueue(){
+        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+        int entriesCount = localDbHelper.countEntries();
+        if(entriesCount > 0) return true;
+        else return false;
+    }
+
+
     private void sendToRemote(){
         LocalTempModel localTempModel = getFromLocalDb();
         deleteFromLocalDb();
@@ -380,11 +394,19 @@ public class CommonFragment extends Fragment {
                     ) {
                         //call sendToRemote() function again for queued entries in local database
                         successSound.start();
+                        sendingProgress.setVisibility(View.GONE);
+                        if(containsQueue()){
+                            textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Please wait, sending queue of data from phone database. This might take some time.");
+                        } else{
+                            textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Next person in line please scan your tag.");
+                        }
                         sendToRemote();
                     }
                     else{
                         //if response code is not successful play fail sound and add back to the local database
                         failSound.start();
+                        sendingProgress.setVisibility(View.GONE);
+                        textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getRfidNumber() + ". Data temporarily stored on phone. Will attempt to send data again later.");
                         addToLocalDb(String.valueOf(tempData.getRfidNumber()),
                                 String.valueOf(tempData.getTemperature()),
                                 tempData.getLocation(),
@@ -399,6 +421,8 @@ public class CommonFragment extends Fragment {
                     //if onFailure play fail sound and add back to the local database
                     failSound.start();
                     Log.d("TRACK", "Failure message:" + throwable.getMessage());
+                    sendingProgress.setVisibility(View.GONE);
+                    textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getRfidNumber() + ". Data temporarily stored on phone. Will attempt to send data again later.");
                     addToLocalDb(String.valueOf(tempData.getRfidNumber()),
                             String.valueOf(tempData.getTemperature()),
                             tempData.getLocation(),
@@ -409,6 +433,8 @@ public class CommonFragment extends Fragment {
     }
 
     private void requestPost(String epcPost, String tempPost, String locationPost, String datetime) {
+        sendingProgress.setVisibility(View.VISIBLE);
+        textProgress.setText("Attempting to send to online database");
         addToLocalDb(epcPost,tempPost,locationPost,datetime);
         sendToRemote();
     }
