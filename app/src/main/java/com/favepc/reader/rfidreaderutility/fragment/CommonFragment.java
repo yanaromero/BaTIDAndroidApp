@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.favepc.reader.rfidreaderutility.AppContext;
@@ -107,7 +109,8 @@ public class CommonFragment extends Fragment {
     MediaPlayer successSound;
     MediaPlayer failSound;
     MediaPlayer localDbSound;
-    ProgressBar sendingProgressBar;
+    ProgressBar sendingProgress;
+    TextView textProgress;
 
     public CommonFragment() {
         super();
@@ -152,7 +155,7 @@ public class CommonFragment extends Fragment {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl("https://dbopayment.sparksoft.com.ph:4000/api/")
+                .baseUrl("http://dbopayment.sparksoft.com.ph:4000/api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         apiHolder = retrofit.create(ApiHolder.class);
@@ -181,8 +184,9 @@ public class CommonFragment extends Fragment {
 
             this.mCommonListAdapter = new CommonListAdapter(this.mContext, R.layout.adapter_common, this.mCommons);
             ListView lv = (ListView)this.mCommonView.findViewById(R.id.common_lvMsg);
+            sendingProgress = (ProgressBar) mCommonView.findViewById(R.id.sending_progress_bar);
+            textProgress = (TextView)mCommonView.findViewById(R.id.progress_textView);
             lv.setAdapter(this.mCommonListAdapter);
-            sendingProgressBar = (ProgressBar) mCommonView.findViewById(R.id.sending_progress_bar);
 
                     Runnable mPendingRunnable = new Runnable() {
                 @Override
@@ -353,12 +357,14 @@ public class CommonFragment extends Fragment {
         boolean success = localDbHelper.deleteFirstEntry();
         return success;
     }
+
     private boolean containsQueue(){
         LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
         int entriesCount = localDbHelper.countEntries();
         if(entriesCount > 0) return true;
         else return false;
     }
+
 
     private void sendToRemote(){
 //        sendingProgressBar.setVisibility(View.VISIBLE);
@@ -389,11 +395,22 @@ public class CommonFragment extends Fragment {
                     ) {
                         //call sendToRemote() function again for queued entries in local database
                         successSound.start();
+                        sendingProgress.setVisibility(View.GONE);
+                        if(containsQueue()){
+                            textProgress.setBackgroundColor(Color.parseColor("#efec5c")); //make bg of textview yellow
+                            textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Please wait, sending queue of data from phone database. This might take some time.");
+                        } else{
+                            textProgress.setBackgroundColor(Color.parseColor("#57e31c")); //make bg of textview green
+                            textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Next person in line please scan your tag.");
+                        }
                         sendToRemote();
                     }
                     else{
                         //if response code is not successful play fail sound and add back to the local database
                         failSound.start();
+                        sendingProgress.setVisibility(View.GONE);
+                        textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+                        textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getRfidNumber() + ". Data temporarily stored on phone. Will attempt to send data again later.");
                         addToLocalDb(String.valueOf(tempData.getRfidNumber()),
                                 String.valueOf(tempData.getTemperature()),
                                 tempData.getLocation(),
@@ -408,6 +425,9 @@ public class CommonFragment extends Fragment {
                     //if onFailure play fail sound and add back to the local database
                     failSound.start();
                     Log.d("TRACK", "Failure message:" + throwable.getMessage());
+                    sendingProgress.setVisibility(View.GONE);
+                    textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+                    textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getRfidNumber() + ". Data temporarily stored on phone. Will attempt to send data again later.");
                     addToLocalDb(String.valueOf(tempData.getRfidNumber()),
                             String.valueOf(tempData.getTemperature()),
                             tempData.getLocation(),
@@ -418,6 +438,9 @@ public class CommonFragment extends Fragment {
     }
 
     private void requestPost(String epcPost, String tempPost, String locationPost, String datetime) {
+        sendingProgress.setVisibility(View.VISIBLE);
+        textProgress.setBackgroundColor(Color.parseColor("#B1D4E0"));
+        textProgress.setText("Attempting to send to online database");
         addToLocalDb(epcPost,tempPost,locationPost,datetime);
         sendToRemote();
     }

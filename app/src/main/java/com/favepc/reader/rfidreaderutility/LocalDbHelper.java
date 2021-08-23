@@ -91,6 +91,7 @@ public class LocalDbHelper extends SQLiteOpenHelper {
             return false;
         }
     }
+
     public int countEntries(){
         String queryString = "SELECT * FROM " + TEMP_TABLE;
         SQLiteDatabase db = this.getReadableDatabase();

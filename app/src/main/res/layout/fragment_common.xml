@@ -29,6 +29,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_alignParentBottom="true">
+
         <com.favepc.reader.rfidreaderutility.adapter.WrapContentViewPager
             android:id="@+id/common_viewPager"
             android:layout_width="match_parent"
@@ -36,6 +37,7 @@
             android:background="@drawable/gradient_pager"
             android:flipInterval="5"
             android:persistentDrawingCache="animation">
+
         </com.favepc.reader.rfidreaderutility.adapter.WrapContentViewPager>
     </LinearLayout>
 
@@ -47,4 +49,15 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="320dp" />
+    <TextView
+        android:id="@+id/progress_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#B1D4E0"
+        android:textColor="#0C2D48"
+        android:textSize="20dp"
+        android:layout_below="@+id/sending_progress_bar"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="30dp"
+        android:text="" />
 </RelativeLayout>
