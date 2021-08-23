@@ -58,7 +58,7 @@
         android:textSize="20dp"
         android:layout_below="@+id/sending_progress_bar"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
+        android:layout_margin="30dp"
         android:text="" />
 
 </RelativeLayout>

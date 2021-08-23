@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -396,8 +397,10 @@ public class CommonFragment extends Fragment {
                         successSound.start();
                         sendingProgress.setVisibility(View.GONE);
                         if(containsQueue()){
+                            textProgress.setBackgroundColor(Color.parseColor("#efec5c")); //make bg of textview yellow
                             textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Please wait, sending queue of data from phone database. This might take some time.");
                         } else{
+                            textProgress.setBackgroundColor(Color.parseColor("#57e31c")); //make bg of textview green
                             textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Next person in line please scan your tag.");
                         }
                         sendToRemote();
@@ -406,6 +409,7 @@ public class CommonFragment extends Fragment {
                         //if response code is not successful play fail sound and add back to the local database
                         failSound.start();
                         sendingProgress.setVisibility(View.GONE);
+                        textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
                         textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getRfidNumber() + ". Data temporarily stored on phone. Will attempt to send data again later.");
                         addToLocalDb(String.valueOf(tempData.getRfidNumber()),
                                 String.valueOf(tempData.getTemperature()),
@@ -422,6 +426,7 @@ public class CommonFragment extends Fragment {
                     failSound.start();
                     Log.d("TRACK", "Failure message:" + throwable.getMessage());
                     sendingProgress.setVisibility(View.GONE);
+                    textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
                     textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getRfidNumber() + ". Data temporarily stored on phone. Will attempt to send data again later.");
                     addToLocalDb(String.valueOf(tempData.getRfidNumber()),
                             String.valueOf(tempData.getTemperature()),
@@ -434,6 +439,7 @@ public class CommonFragment extends Fragment {
 
     private void requestPost(String epcPost, String tempPost, String locationPost, String datetime) {
         sendingProgress.setVisibility(View.VISIBLE);
+        textProgress.setBackgroundColor(Color.parseColor("#B1D4E0"));
         textProgress.setText("Attempting to send to online database");
         addToLocalDb(epcPost,tempPost,locationPost,datetime);
         sendToRemote();
