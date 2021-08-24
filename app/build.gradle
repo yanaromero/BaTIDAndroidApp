@@ -4,7 +4,7 @@ android {
     compileSdkVersion 30
     buildToolsVersion '27.0.3'
     defaultConfig {
-        applicationId "com.favepc.reader.rfidreaderutility"
+        applicationId "com.batid.reader"
         minSdkVersion 21
         targetSdkVersion 30
         versionCode 1
