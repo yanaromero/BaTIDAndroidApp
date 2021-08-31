@@ -111,6 +111,7 @@ public class CommonFragment extends Fragment {
     MediaPlayer localDbSound;
     ProgressBar sendingProgress;
     TextView textProgress;
+    TextView textTempCheck;
 
     public CommonFragment() {
         super();
@@ -186,6 +187,7 @@ public class CommonFragment extends Fragment {
             ListView lv = (ListView)this.mCommonView.findViewById(R.id.common_lvMsg);
             sendingProgress = (ProgressBar) mCommonView.findViewById(R.id.sending_progress_bar);
             textProgress = (TextView)mCommonView.findViewById(R.id.progress_textView);
+            textTempCheck = (TextView)mCommonView.findViewById(R.id.temperature_check_textView);
             lv.setAdapter(this.mCommonListAdapter);
 
                     Runnable mPendingRunnable = new Runnable() {
@@ -394,14 +396,27 @@ public class CommonFragment extends Fragment {
                             response.body().getTemperature().equals(tempData.getTemperature())
                     ) {
                         //call sendToRemote() function again for queued entries in local database
-                        successSound.start();
                         sendingProgress.setVisibility(View.GONE);
                         if(containsQueue()){
                             textProgress.setBackgroundColor(Color.parseColor("#efec5c")); //make bg of textview yellow
                             textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Please wait, sending queue of data from phone database. This might take some time.");
+
                         } else{
                             textProgress.setBackgroundColor(Color.parseColor("#57e31c")); //make bg of textview green
                             textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Next person in line please scan your tag.");
+                            Log.d("DOUBLE PARSE", "onResponse: " +Double.parseDouble(tempData.getTemperature()));
+                            //check if temperature is within normal range
+                            if(Double.compare(Double.parseDouble(tempData.getTemperature()),31.0) < 0 ){
+                                textTempCheck.setBackgroundColor(Color.parseColor("#57e31c"));//make bg of textview green
+                                textTempCheck.setText("Within normal body temperature.");
+                                successSound.start();
+                            }
+                            else{
+                                textTempCheck.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+                                textTempCheck.setTextColor(Color.parseColor("#ffffff"));
+                                textTempCheck.setText("Above normal body temperature.");
+                                failSound.start();
+                            }
                         }
                         sendToRemote();
                     }
@@ -416,6 +431,18 @@ public class CommonFragment extends Fragment {
                                 tempData.getLocation(),
                                 tempData.getDatetime());
                         Log.d("TRACK", "onResponse: " + response.code() + response);
+                        //check if temperature is within normal range
+                        if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.0) < 0 ){
+                            textTempCheck.setBackgroundColor(Color.parseColor("#57e31c"));//make bg of textview green
+                            textTempCheck.setText("Within normal body temperature.");
+                            successSound.start();
+                        }
+                        else{
+                            textTempCheck.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+                            textTempCheck.setTextColor(Color.parseColor("#ffffff"));
+                            textTempCheck.setText("Above normal body temperature.");
+                            failSound.start();
+                        }
                     }
 
                 }
@@ -432,6 +459,18 @@ public class CommonFragment extends Fragment {
                             String.valueOf(tempData.getTemperature()),
                             tempData.getLocation(),
                             tempData.getDatetime());
+                    //check if temperature is within normal range
+                    if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.0) < 0 ){
+                        textTempCheck.setBackgroundColor(Color.parseColor("#57e31c"));//make bg of textview green
+                        textTempCheck.setText("Within normal body temperature.");
+                        successSound.start();
+                    }
+                    else{
+                        textTempCheck.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+                        textTempCheck.setTextColor(Color.parseColor("#ffffff"));
+                        textTempCheck.setText("Above normal body temperature.");
+                        failSound.start();
+                    }
                 }
             });
         }

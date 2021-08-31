@@ -60,4 +60,15 @@
         android:layout_centerHorizontal="true"
         android:layout_margin="30dp"
         android:text="" />
+    <TextView
+        android:id="@+id/temperature_check_textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#B1D4E0"
+        android:textColor="#0C2D48"
+        android:textSize="20dp"
+        android:layout_below="@+id/progress_textView"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="30dp"
+        android:text="" />
 </RelativeLayout>
