@@ -25,12 +25,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.favepc.reader.rfidreaderutility.fragment.CommonFragment;
-//import com.favepc.reader.rfidreaderutility.fragment.DemoIRFragment;
-//import com.favepc.reader.rfidreaderutility.fragment.DemoUFragment;
-//import com.favepc.reader.rfidreaderutility.fragment.DemoURFragment;
 import com.favepc.reader.rfidreaderutility.fragment.OTGFragment;
-//import com.favepc.reader.rfidreaderutility.fragment.RegularFragment;
-import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
 import com.favepc.reader.service.BluetoothService;
 import com.favepc.reader.service.NetService;
 import com.favepc.reader.service.OTGService;
@@ -54,6 +49,7 @@ public class MainActivity extends AppCompatActivity
     public static final String TAG_CI_UNLINK = "UNLINK";
     private static String NAV_CURRENT_TAG = TAG_DEMO;
     private static String COMMUNICATION_INTERFACE = TAG_CI_UNLINK;
+    public static final String TAG_ABOUT = "About";
 
     private AppContext mAppContext;
     private Handler mHandler;
@@ -64,8 +60,6 @@ public class MainActivity extends AppCompatActivity
     private Fragment mCurrentFragment, mOldFragment;
     private NotificationReceiver mNotificationReceiver;
     private int mConnectStatus = 0; //otg = 1; ble = 2; wifi = 4;
-
-    private CustomKeyboardManager mKeyboardManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,13 +109,11 @@ public class MainActivity extends AppCompatActivity
 
         if (savedInstanceState == null) {
             navItemIndex = 0;
-            NAV_CURRENT_TAG = TAG_DEMO;
+            NAV_CURRENT_TAG = TAG_CI_OTG;
             navigateToFragment();
         }
 
-        this.mKeyboardManager = new CustomKeyboardManager(this);
         this.mAppContext = (AppContext) this.getApplicationContext();
-        this.mAppContext.setKeyboard(this.mKeyboardManager);
     }
 
 
@@ -161,7 +153,9 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
-
+        if (id == R.id.nav_about){
+            return false;
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -177,18 +171,25 @@ public class MainActivity extends AppCompatActivity
                 navItemIndex = 0;
                 NAV_CURRENT_TAG = TAG_CI_OTG;
                 break;
+            case R.id.nav_about:
+//                NAV_CURRENT_TAG = TAG_ABOUT;
+                Intent intent = new Intent(this, About.class);
+                startActivity(intent);
+                break;
 
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
 
-        if (item.isChecked()) {
+        if (item.getItemId() != R.id.nav_about && item.isChecked()) {
             item.setChecked(false);
         } else {
             item.setChecked(true);
         }
-        item.setChecked(true);
+        if (item.getItemId() != R.id.nav_about) {
+            item.setChecked(true);
+        }
 
         navigateToFragment();
 
@@ -201,7 +202,8 @@ public class MainActivity extends AppCompatActivity
      */
     private void navigateToFragment() {
         // selecting appropriate nav menu item
-        this.navigationView.getMenu().getItem(navItemIndex).setChecked(true);
+//        this.navigationView.getMenu().getItem(navItemIndex).setChecked(true);
+
         // set toolbar title
         getSupportActionBar().setTitle(activityTitles[navItemIndex]);
 
@@ -235,6 +237,7 @@ public class MainActivity extends AppCompatActivity
             toggleFab();
 
             drawerLayout.closeDrawers();
+            invalidateOptionsMenu();
             return;
         }
 
@@ -300,6 +303,8 @@ public class MainActivity extends AppCompatActivity
             case 1:
                 CommonFragment commonFragment = new CommonFragment(this, this);
                 return commonFragment;
+            case 2:
+                return null;
             default:
                 return new OTGFragment(this, this);
         }

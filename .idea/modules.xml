@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/baTIDReader.iml" filepath="$PROJECT_DIR$/.idea/modules/baTIDReader.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/baTIDReader.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/baTIDReader.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/batid-reader.iml" filepath="$PROJECT_DIR$/.idea/modules/batid-reader.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/batid-reader.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/batid-reader.app.iml" />
     </modules>
   </component>
 </project>

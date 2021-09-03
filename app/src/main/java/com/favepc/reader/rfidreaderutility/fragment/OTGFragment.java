@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.os.Build;
 import android.os.Bundle;
@@ -179,6 +180,7 @@ public class OTGFragment extends Fragment {
 
             this.mProgressBar.setVisibility(View.VISIBLE);
             this.mTextViewMsg.setText(R.string.otg_msg_start_enumerate);
+            this.mTextViewMsg.setBackgroundColor(Color.parseColor("#efec5c"));
             this.mOTGListAdapter.clear();
 
             //Returns a HashMap containing all USB devices currently attached.
@@ -188,6 +190,7 @@ public class OTGFragment extends Fragment {
                 this.m_bScanning = false;
                 this.mProgressBar.setVisibility(View.GONE);
                 this.mTextViewMsg.setText(R.string.otg_msg_stop_enumerate_no_device);
+                this.mTextViewMsg.setBackgroundColor(Color.parseColor("#efec5c"));
             }
             else {
                 //Returns an iterator over the elements in this collection.
@@ -215,6 +218,7 @@ public class OTGFragment extends Fragment {
                 this.m_bScanning = false;
                 this.mProgressBar.setVisibility(View.GONE);
                 this.mTextViewMsg.setText(R.string.otg_msg_stop_enumerate);
+                this.mTextViewMsg.setBackgroundColor(Color.parseColor("#efec5c"));
             }
         }
     }
@@ -239,6 +243,7 @@ public class OTGFragment extends Fragment {
             }
             else {
                 mTextViewMsg.setText(getString(R.string.otg_msg_driver_no_support));
+                mTextViewMsg.setBackgroundColor(Color.parseColor("#efec5c"));
             }
         }
     };
@@ -253,10 +258,12 @@ public class OTGFragment extends Fragment {
                     break;
                 case OTGService.OTG_ACTION_CONNECTED:
                     mTextViewMsg.setText(intent.getExtras().getString(OTGService.STRING_DATA));
+                    mTextViewMsg.setBackgroundColor(Color.parseColor("#57e31c"));
                     ((MainActivity) mContext).interfaceCtrl(OTGService.INTERFACE_OTG, true);
                     break;
                 case OTGService.OTG_ACTION_DISCONNECTED:
                     mTextViewMsg.setText(intent.getExtras().getString(OTGService.STRING_DATA));
+                    mTextViewMsg.setBackgroundColor(Color.parseColor("#ec1e13"));
                     ((MainActivity) mContext).interfaceCtrl(OTGService.INTERFACE_OTG, false);
                     break;
                 case OTGService.OTG_ACTION_SETTING_ERROR:

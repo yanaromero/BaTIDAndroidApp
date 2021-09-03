@@ -4,36 +4,15 @@
     android:layout_height="match_parent"
     android:orientation="horizontal"
     android:padding="1dp">
-    <TextView
-        android:id="@+id/adapter_common_tx"
-        android:layout_width="28dp"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="2dp"
-        android:gravity="center"
-        android:background="@color/colorBlue200"
-        android:textSize="13dp"
-        android:text="@string/common_adapter_tx"
-        android:textStyle="bold"/>
-    <TextView
-        android:id="@+id/adapter_common_rx"
-        android:layout_width="28dp"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="2dp"
-        android:gravity="center"
-        android:background="@color/colorPink200"
-        android:textSize="13dp"
-        android:text="@string/common_adapter_rx"
-        android:textStyle="bold"/>
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/adapter_common_tx">
+        android:layout_height="wrap_content">
         <TextView
             android:id="@+id/adapter_common_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:maxLines="6"
-            android:textSize="13dp"
+            android:textSize="20dp"
             android:textStyle="italic"/>
 
         <TextView
@@ -44,11 +23,7 @@
             android:layout_alignParentRight="true"
             android:layout_marginBottom="-3dp"
             android:gravity="bottom"
-            android:textSize="9dp"
+            android:textSize="13dp"
             android:textStyle="bold" />
-
     </RelativeLayout>
-
-
-
 </RelativeLayout>

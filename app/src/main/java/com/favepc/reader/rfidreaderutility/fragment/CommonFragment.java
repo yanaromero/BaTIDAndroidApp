@@ -6,6 +6,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -20,16 +22,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.favepc.reader.rfidreaderutility.AppContext;
+import com.favepc.reader.rfidreaderutility.LocalDbHelper;
+import com.favepc.reader.rfidreaderutility.LocalTempModel;
 import com.favepc.reader.rfidreaderutility.MainActivity;
 import com.favepc.reader.rfidreaderutility.R;
 import com.favepc.reader.rfidreaderutility.adapter.CommonListAdapter;
 import com.favepc.reader.rfidreaderutility.adapter.CommonPageAdapter;
 import com.favepc.reader.rfidreaderutility.adapter.WrapContentViewPager;
 import com.favepc.reader.rfidreaderutility.object.Common;
-import com.favepc.reader.rfidreaderutility.object.CustomKeyboardManager;
 import com.favepc.reader.rfidreaderutility.pager.CommonReadPage;
 import com.favepc.reader.service.OTGService;
 import com.favepc.reader.service.ReaderService;
@@ -90,7 +95,6 @@ public class CommonFragment extends Fragment {
     private byte[] mProcess;
     private ArrayList<HashMap<String, String>> mProcessList;
     private SimpleDateFormat mDateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-    private CustomKeyboardManager mCustomKeyboardManager;
 
     private String epcPrev;
     private String epcCur;
@@ -98,10 +102,16 @@ public class CommonFragment extends Fragment {
     private String readPrev = "";
     private String readCur;
     private String readerID;
-    private String datetime;
 
     ApiHolder apiHolder;
     String token = "Bearer cb5c185b0348c227ec2e32e00b41d7a99129a635c474f4278b4cd7c590eb8a1e71500585db23453d9b5a0974e449bcf6596589f05bc31add00b7089859388a06";
+
+    MediaPlayer successSound;
+    MediaPlayer failSound;
+    MediaPlayer localDbSound;
+    ProgressBar sendingProgress;
+    TextView textProgress;
+    TextView textTempCheck;
 
     public CommonFragment() {
         super();
@@ -116,7 +126,6 @@ public class CommonFragment extends Fragment {
         super.onAttach(context);
         this.mContext = context;
         this.mAppContext = (AppContext) context.getApplicationContext();
-        this.mCustomKeyboardManager = this.mAppContext.getKeyboard();
         this.mActivity = getActivity();
         this.mAppContext = (AppContext) context.getApplicationContext();
         this.mReaderService = new ReaderService();
@@ -132,6 +141,7 @@ public class CommonFragment extends Fragment {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        //OkHttpClient to add header to all request
         OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
@@ -142,6 +152,8 @@ public class CommonFragment extends Fragment {
             }
         }).build();
 
+        //initialize retrofit builder for api requests
+
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl("http://dbopayment.sparksoft.com.ph:4000/api/")
@@ -150,10 +162,17 @@ public class CommonFragment extends Fragment {
         apiHolder = retrofit.create(ApiHolder.class);
 
 //        Retrofit retrofit = new Retrofit.Builder()
+//                .client(client)
 //                .baseUrl("http://192.168.1.4:8000/")
 //                .addConverterFactory(GsonConverterFactory.create())
 //                .build();
 //        apiHolder = retrofit.create(ApiHolder.class);
+
+        //initialize application sounds
+        successSound = MediaPlayer.create(getContext(), R.raw.success);
+        failSound = MediaPlayer.create(getContext(), R.raw.fail);
+        localDbSound = MediaPlayer.create(getContext(), R.raw.local_db);
+
     }
 
     @Nullable
@@ -166,15 +185,17 @@ public class CommonFragment extends Fragment {
 
             this.mCommonListAdapter = new CommonListAdapter(this.mContext, R.layout.adapter_common, this.mCommons);
             ListView lv = (ListView)this.mCommonView.findViewById(R.id.common_lvMsg);
+            sendingProgress = (ProgressBar) mCommonView.findViewById(R.id.sending_progress_bar);
+            textProgress = (TextView)mCommonView.findViewById(R.id.progress_textView);
+            textTempCheck = (TextView)mCommonView.findViewById(R.id.temperature_check_textView);
             lv.setAdapter(this.mCommonListAdapter);
 
-
-            Runnable mPendingRunnable = new Runnable() {
+                    Runnable mPendingRunnable = new Runnable() {
                 @Override
                 public void run() {
                     //create pager: epc,tid, read, write
                     {
-                        mCommonReadPage = new CommonReadPage(mContext, mActivity, mLayoutInflater, mReaderService, mCustomKeyboardManager);
+                        mCommonReadPage = new CommonReadPage(mContext, mActivity, mLayoutInflater, mReaderService);
                     }
                     //add page view
                     {
@@ -310,27 +331,157 @@ public class CommonFragment extends Fragment {
         }
     }
 
-    private void createPost(String epcPost, String tempPost, String locationPost) {
+    private void addToLocalDb(String rfidNumber, String temperature, String location, String datetime){
+        LocalTempModel localTempModel = null;
 
-        TempData tempData = new TempData(tempPost,epcPost, locationPost);
+        //add rfidNumber, temperature, locationID, and datetime to local database
+        try {
+            localTempModel = new LocalTempModel(-1,Integer.parseInt(rfidNumber),Double.parseDouble(temperature),location,datetime);
+            Log.d("addTolocalDb", localTempModel.toString());
+        } catch (Exception e){
+            Log.d("addToLocalDb", "Error creating temp data.");
+        }
 
-        Call<TempData> call = apiHolder.createPost(tempData);
+        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+        boolean success = localDbHelper.addOne(localTempModel);
+    }
 
-        call.enqueue(new Callback<TempData>() {
-            @Override
-            public void onResponse(Call<TempData> call, Response<TempData> response) {
-                if(!response.isSuccessful()){
-                    Log.d("TRACK", "onResponse: " + response.code());
+    private LocalTempModel getFromLocalDb(){
+        //get first entry in the local database
+        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+        LocalTempModel localTempModel = localDbHelper.getFirstEntry();
+        return localTempModel;
+    }
+
+    private boolean deleteFromLocalDb(){
+        //delete the first entry in the local database
+        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+        boolean success = localDbHelper.deleteFirstEntry();
+        return success;
+    }
+
+    private boolean containsQueue(){
+        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+        int entriesCount = localDbHelper.countEntries();
+        if(entriesCount > 0) return true;
+        else return false;
+    }
+
+
+    private void sendToRemote(){
+//        sendingProgressBar.setVisibility(View.VISIBLE);
+        LocalTempModel localTempModel = getFromLocalDb();
+        deleteFromLocalDb();
+
+        //if local database is not empty
+        if (localTempModel != null) {
+
+            //parse the LocalTempModel to TempData
+            final TempData tempData = new TempData(
+                    String.valueOf(localTempModel.getTemperature()),
+                    String.valueOf(localTempModel.getRfidNumber()),
+                    localTempModel.getLocation(),
+                    localTempModel.getDatetime()
+            );
+
+            //enqueue post request
+            Call<TempData> call = apiHolder.createPost(tempData);
+            call.enqueue(new Callback<TempData>() {
+                @Override
+                public void onResponse(Call<TempData> call, Response<TempData> response) {
+                    if(
+                            response.body().getDatetime().replace("T"," ").replace(".000Z","").equals(tempData.getDatetime()) &&
+                            response.body().getLocation().equals(tempData.getLocation()) &&
+                            response.body().getRfidNumber().equals(tempData.getRfidNumber()) &&
+                            response.body().getTemperature().equals(tempData.getTemperature())
+                    ) {
+                        //call sendToRemote() function again for queued entries in local database
+                        sendingProgress.setVisibility(View.GONE);
+                        if(containsQueue()){
+                            textProgress.setBackgroundColor(Color.parseColor("#efec5c")); //make bg of textview yellow
+                            textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Please wait, sending queue of data from phone database. This might take some time.");
+
+                        } else{
+                            textProgress.setBackgroundColor(Color.parseColor("#57e31c")); //make bg of textview green
+                            textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Next person in line please scan your tag.");
+                            Log.d("DOUBLE PARSE", "onResponse: " +Double.parseDouble(tempData.getTemperature()));
+                            //check if temperature is within normal range
+                            if(Double.compare(Double.parseDouble(tempData.getTemperature()),31.0) < 0 ){
+                                textTempCheck.setBackgroundColor(Color.parseColor("#57e31c"));//make bg of textview green
+                                textTempCheck.setText("Within normal body temperature.");
+                                successSound.start();
+                            }
+                            else{
+                                textTempCheck.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+                                textTempCheck.setTextColor(Color.parseColor("#ffffff"));
+                                textTempCheck.setText("Above normal body temperature.");
+                                failSound.start();
+                            }
+                        }
+                        sendToRemote();
+                    }
+                    else{
+                        //if response code is not successful play fail sound and add back to the local database
+                        failSound.start();
+                        sendingProgress.setVisibility(View.GONE);
+                        textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+                        textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getRfidNumber() + ". Data temporarily stored on phone. Will attempt to send data again later.");
+                        addToLocalDb(String.valueOf(tempData.getRfidNumber()),
+                                String.valueOf(tempData.getTemperature()),
+                                tempData.getLocation(),
+                                tempData.getDatetime());
+                        Log.d("TRACK", "onResponse: " + response.code() + response);
+                        //check if temperature is within normal range
+                        if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.0) < 0 ){
+                            textTempCheck.setBackgroundColor(Color.parseColor("#57e31c"));//make bg of textview green
+                            textTempCheck.setText("Within normal body temperature.");
+                            successSound.start();
+                        }
+                        else{
+                            textTempCheck.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+                            textTempCheck.setTextColor(Color.parseColor("#ffffff"));
+                            textTempCheck.setText("Above normal body temperature.");
+                            failSound.start();
+                        }
+                    }
+
                 }
-                Log.d("TRACK","body response:" + response.body());
-            }
 
-            @Override
-            public void onFailure(Call<TempData> call, Throwable throwable) {
-                Log.d("TRACK","Failure message:" + throwable.getMessage());
-            }
-        });
+                @Override
+                public void onFailure(Call<TempData> call, Throwable throwable) {
+                    //if onFailure play fail sound and add back to the local database
+                    failSound.start();
+                    Log.d("TRACK", "Failure message:" + throwable.getMessage());
+                    sendingProgress.setVisibility(View.GONE);
+                    textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+                    textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getRfidNumber() + ". Data temporarily stored on phone. Will attempt to send data again later.");
+                    addToLocalDb(String.valueOf(tempData.getRfidNumber()),
+                            String.valueOf(tempData.getTemperature()),
+                            tempData.getLocation(),
+                            tempData.getDatetime());
+                    //check if temperature is within normal range
+                    if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.0) < 0 ){
+                        textTempCheck.setBackgroundColor(Color.parseColor("#57e31c"));//make bg of textview green
+                        textTempCheck.setText("Within normal body temperature.");
+                        successSound.start();
+                    }
+                    else{
+                        textTempCheck.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+                        textTempCheck.setTextColor(Color.parseColor("#ffffff"));
+                        textTempCheck.setText("Above normal body temperature.");
+                        failSound.start();
+                    }
+                }
+            });
+        }
+    }
 
+    private void requestPost(String epcPost, String tempPost, String locationPost, String datetime) {
+        sendingProgress.setVisibility(View.VISIBLE);
+        textProgress.setBackgroundColor(Color.parseColor("#B1D4E0"));
+        textProgress.setText("Attempting to send to online database");
+        addToLocalDb(epcPost,tempPost,locationPost,datetime);
+        sendToRemote();
     }
 
     private Handler mCommonHandler = new Handler() {
@@ -347,57 +498,81 @@ public class CommonFragment extends Fragment {
                     if(s.contains("R")){
                         readCur = s;
                         if(
-                                !readCur.equals("R")&& // checks if user memory reading was successful
-                                !epcCur.equals("Q")&&  // checks if EPC reading was successful
-                                !write.equals("W") // checks if writing to memory was successful
-                                && epcCur.length() > 8
+                            !readCur.equals("R")&& // checks if user memory reading was successful
+                            !epcCur.equals("Q")&&  // checks if EPC reading was successful
+                            !write.equals("W") // checks if writing to memory was successful
+                            && epcCur.length() > 8
                         ) {
+                            // remove excess 0's from epc reading
                             String remove = epcCur.substring(1,25);
                             epcCur = epcCur.replace(remove, "").replace("Q","");
                             remove = epcCur.substring(8);
                             epcCur = epcCur.replace(remove,"");
 
-                            if (readCur.equals("R8100") && !readPrev.equals(readCur)){
+                            //checks if low battery and invalid reading && not repeating tag
+                            if (readCur.equals("R8100")){
+                                //if it's not low bat and invalid reading again
+                                if(!readCur.equals(readPrev)) {
+                                    // add the tag number and low battery message and date to screen
                                     updateView(new Common(true,
                                             epcCur,
                                             mDateFormat.format(new Date())));
-
-                                    readPrev = readCur;
 
                                     updateView(new Common(true,
                                             "Your tag has low battery.",
                                             mDateFormat.format(new Date())));
-                                    epcPrev = "";
 
-                            } else if (readCur.equals("R0100")){
-                                updateView(new Common(true,
-                                        "Temperature reading was invalid. Please try again.",
-                                        mDateFormat.format(new Date())));
-                                epcPrev = "";
-                                readPrev = "";
+                                    readPrev = readCur;
+                                    epcPrev = "";
+                                    failSound.start();
+                                }
+
                             }
-                            else if(!readCur.equals("R8100")){
+                            //checks if invalid reading
+                            else if (readCur.equals("R0100")){
+                                //if it's not the same invalid reading again
+                                if(!readCur.equals(readPrev)){
+                                    //add invalid reading message and date to screen
+                                    updateView(new Common(true,
+                                            "Temperature reading was invalid. Please try again.",
+                                            mDateFormat.format(new Date())));
+
+                                    epcPrev = "";
+                                    readPrev = readCur;
+                                    failSound.start();
+                                }
+                            }
+                            else{
+                                //if it's not the same tag as last reading
                                 if(!epcCur.equals(epcPrev))
                                 {
+                                    //display tag number
                                     updateView(new Common(true,
                                             epcCur,
                                             mDateFormat.format(new Date())));
 
+                                    //extract and convert temperature
                                     readCur = readCur.replace("R", "");
                                     tempRaw = Integer.parseInt(readCur, 16);
                                     tempConvert = tempRaw;
                                     tempConvert = tempConvert / 4;
                                     readCur = "Temperature: " + String.valueOf(tempConvert) + " C";
 
+                                    //get readerID for location ID
                                     readerID = readerID.replace("S","");
 
-//                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//                                    datetime = sdf.format(new Date());
+                                    //generate current datetime
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                    String datetime = sdf.format(new Date());
 
-                                    createPost(epcCur,String.valueOf(tempConvert),readerID);
+                                    //call requestPost function to send data to database
+                                    requestPost(epcCur,String.valueOf(tempConvert),readerID,datetime);
+
+                                    //display temperature to screen
                                     updateView(new Common(true,
                                             readCur,
                                             mDateFormat.format(new Date())));
+
                                     epcPrev = epcCur;
                                     readPrev = "";
                                 }
