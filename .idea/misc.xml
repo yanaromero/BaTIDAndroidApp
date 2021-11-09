@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/Diana Romero/StudioProjects/batid-reader/app/src/main/res/layout/app_bar_main.xml" value="0.36367753623188404" />
+        <entry key="..\:/Users/Diana Romero/StudioProjects/batid-reader/app/src/main/res/layout/content_main.xml" value="0.36367753623188404" />
+        <entry key="..\:/Users/Diana Romero/StudioProjects/batid-reader/app/src/main/res/layout/fragment_common.xml" value="0.36367753623188404" />
+        <entry key="..\:/Users/Diana Romero/StudioProjects/batid-reader/app/src/main/res/layout/fragment_otg.xml" value="0.36367753623188404" />
+        <entry key="..\:/Users/Diana Romero/StudioProjects/batid-reader/app/src/main/res/layout/nav_header_main.xml" value="0.36367753623188404" />
+      </map>
+    </option>
+  </component>
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="android.support.annotation.Nullable" />
     <option name="myDefaultNotNull" value="android.support.annotation.NonNull" />

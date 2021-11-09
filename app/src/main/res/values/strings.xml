@@ -8,7 +8,7 @@
     <string name="menu_clear">Clear</string>
 
     <string name="nav_header_name">BaTID Reader App</string>
-    <string name="nav_header_version">v1.0 August 2021</string>
+    <string name="nav_header_version">v1.2 November 2021</string>
 
     <string name="menu_item_common">Read Tags</string>
     <string name="menu_item_otg">Connect Reader</string>
