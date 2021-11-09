@@ -156,7 +156,7 @@ public class CommonFragment extends Fragment {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
-                .baseUrl("http://dbopayment.sparksoft.com.ph:4000/api/")
+                .baseUrl("https://dbopayment.sparksoft.com.ph:4000/api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         apiHolder = retrofit.create(ApiHolder.class);
@@ -338,12 +338,18 @@ public class CommonFragment extends Fragment {
         try {
             localTempModel = new LocalTempModel(-1,Integer.parseInt(rfidNumber),Double.parseDouble(temperature),location,datetime);
             Log.d("addTolocalDb", localTempModel.toString());
-        } catch (Exception e){
+            LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
+            boolean success = localDbHelper.addOne(localTempModel);
+        } catch (NumberFormatException ex){
             Log.d("addToLocalDb", "Error creating temp data.");
+            sendingProgress.setVisibility(View.GONE);
+            textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+            textProgress.setText("ID Number: " + rfidNumber + " is not a valid ID Number format. IDs must only contain numeric characters. Data cannot be sent to database.");
+            textTempCheck.setVisibility(View.GONE);
+            failSound.start();
         }
 
-        LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
-        boolean success = localDbHelper.addOne(localTempModel);
+
     }
 
     private LocalTempModel getFromLocalDb(){
@@ -389,6 +395,7 @@ public class CommonFragment extends Fragment {
             call.enqueue(new Callback<TempData>() {
                 @Override
                 public void onResponse(Call<TempData> call, Response<TempData> response) {
+//                    Log.d("check loc", "onResponse: getLOCATION:" + );
                     if(
                             response.body().getDatetime().replace("T"," ").replace(".000Z","").equals(tempData.getDatetime()) &&
                             response.body().getLocation().equals(tempData.getLocation()) &&
@@ -406,7 +413,7 @@ public class CommonFragment extends Fragment {
                             textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Next person in line please scan your tag.");
                             Log.d("DOUBLE PARSE", "onResponse: " +Double.parseDouble(tempData.getTemperature()));
                             //check if temperature is within normal range
-                            if(Double.compare(Double.parseDouble(tempData.getTemperature()),31.0) < 0 ){
+                            if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.0) < 0 ){
                                 textTempCheck.setBackgroundColor(Color.parseColor("#57e31c"));//make bg of textview green
                                 textTempCheck.setText("Within normal body temperature.");
                                 successSound.start();
@@ -427,9 +434,9 @@ public class CommonFragment extends Fragment {
                         textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
                         textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getRfidNumber() + ". Data temporarily stored on phone. Will attempt to send data again later.");
                         addToLocalDb(String.valueOf(tempData.getRfidNumber()),
-                                String.valueOf(tempData.getTemperature()),
-                                tempData.getLocation(),
-                                tempData.getDatetime());
+                                    String.valueOf(tempData.getTemperature()),
+                                    tempData.getLocation(),
+                                    tempData.getDatetime());
                         Log.d("TRACK", "onResponse: " + response.code() + response);
                         //check if temperature is within normal range
                         if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.0) < 0 ){
@@ -503,11 +510,16 @@ public class CommonFragment extends Fragment {
                             !write.equals("W") // checks if writing to memory was successful
                             && epcCur.length() > 8
                         ) {
-                            // remove excess 0's from epc reading
-                            String remove = epcCur.substring(1,25);
-                            epcCur = epcCur.replace(remove, "").replace("Q","");
-                            remove = epcCur.substring(8);
-                            epcCur = epcCur.replace(remove,"");
+//                             remove excess 0's from epc reading
+                            String remove = epcCur.substring(0,9);
+                            epcCur = epcCur.replace(remove, "");
+//                            remove = epcCur.substring(8);
+//                            epcCur = epcCur.replace(remove,"");
+////                            epcCur = epcCur.replace("Q","").replace("3A00","");
+                            String regex = "^0+(?!$)";
+                            epcCur = epcCur.replaceFirst(regex, "");
+                            remove = epcCur.substring(epcCur.length()-4);
+                            epcCur = epcCur.replace(remove, "");
 
                             //checks if low battery and invalid reading && not repeating tag
                             if (readCur.equals("R8100")){
