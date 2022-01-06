@@ -10,11 +10,8 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 public interface ApiHolderAmbient {
+    // contains current data displayed on panahon.observatory.ph
     @GET("stn_mo_obs.json")
     Call<MOResult> getAmbientTemperature();
-//    Call<ResponseBody> getAmbientTemperature();
-
-//    @POST("create.php")
-//    Call<TempData> createPost(@Body TempData body);
 
 }

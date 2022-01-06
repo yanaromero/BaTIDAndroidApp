@@ -386,24 +386,26 @@ public class CommonFragment extends Fragment {
         else return false;
     }
 
-
-    private void sendToRemote(){
-
+    private void getAmbientTemp(){
         Call <MOResult> weather = apiHolderAmbient.getAmbientTemperature();
         weather.enqueue(new Callback<MOResult>() {
-           @Override
-           public void onResponse(Call<MOResult> call, Response<MOResult> response) {
-               Log.d("AMBIENT TEMP", response.body().getWeatherData().getTemp());
-           }
+            @Override
+            public void onResponse(Call<MOResult> call, Response<MOResult> response) {
+                Log.d("AMBIENT TEMP", response.body().getWeatherData().getTemp());
+            }
 
-           @Override
-           public void onFailure(Call<MOResult> call, Throwable throwable) {
+            @Override
+            public void onFailure(Call<MOResult> call, Throwable throwable) {
 
-               Log.d("AMBIENT TEMP", "Fail");
-           }
+                Log.d("AMBIENT TEMP", "Fail");
+            }
         });
 
+    }
 
+
+    private void sendToRemote(){
+       getAmbientTemp();
 
 
 //        sendingProgressBar.setVisibility(View.VISIBLE);

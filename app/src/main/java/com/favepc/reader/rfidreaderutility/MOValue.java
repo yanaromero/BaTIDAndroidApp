@@ -6,6 +6,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 public class MOValue {
+    //all data retrieved from each location
     @SerializedName("pres")
     @Expose
     private String pres;
@@ -15,9 +16,13 @@ public class MOValue {
     @SerializedName("rh")
     @Expose
     private String rh;
+
+    //current temperature data
     @SerializedName("temp")
     @Expose
     private String temp;
+
+
     @SerializedName("td")
     @Expose
     private String td;
