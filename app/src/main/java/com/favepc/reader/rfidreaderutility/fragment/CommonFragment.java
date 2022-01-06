@@ -184,7 +184,6 @@ public class CommonFragment extends Fragment {
         //initialize application sounds
         successSound = MediaPlayer.create(getContext(), R.raw.success);
         failSound = MediaPlayer.create(getContext(), R.raw.fail);
-        localDbSound = MediaPlayer.create(getContext(), R.raw.local_db);
 
     }
 
