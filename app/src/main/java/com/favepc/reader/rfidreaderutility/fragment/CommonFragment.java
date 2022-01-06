@@ -26,9 +26,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.favepc.reader.rfidreaderutility.ApiHolderAmbient;
 import com.favepc.reader.rfidreaderutility.AppContext;
 import com.favepc.reader.rfidreaderutility.LocalDbHelper;
 import com.favepc.reader.rfidreaderutility.LocalTempModel;
+import com.favepc.reader.rfidreaderutility.MOResult;
+import com.favepc.reader.rfidreaderutility.MOValue;
 import com.favepc.reader.rfidreaderutility.MainActivity;
 import com.favepc.reader.rfidreaderutility.R;
 import com.favepc.reader.rfidreaderutility.adapter.CommonListAdapter;
@@ -39,6 +42,7 @@ import com.favepc.reader.rfidreaderutility.pager.CommonReadPage;
 import com.favepc.reader.service.OTGService;
 import com.favepc.reader.service.ReaderService;
 import com.favepc.reader.rfidreaderutility.ApiHolder;
+import com.favepc.reader.rfidreaderutility.ApiHolderAmbient;
 import com.favepc.reader.rfidreaderutility.TempData;
 
 import java.io.IOException;
@@ -51,6 +55,7 @@ import java.util.List;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -104,6 +109,7 @@ public class CommonFragment extends Fragment {
     private String readerID;
 
     ApiHolder apiHolder;
+    ApiHolderAmbient apiHolderAmbient;
     String token = "Bearer cb5c185b0348c227ec2e32e00b41d7a99129a635c474f4278b4cd7c590eb8a1e71500585db23453d9b5a0974e449bcf6596589f05bc31add00b7089859388a06";
 
     MediaPlayer successSound;
@@ -154,12 +160,19 @@ public class CommonFragment extends Fragment {
 
         //initialize retrofit builder for api requests
 
-        Retrofit retrofit = new Retrofit.Builder()
+        Retrofit sparksoft = new Retrofit.Builder()
                 .client(client)
                 .baseUrl("https://dbopayment.sparksoft.com.ph:4000/api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        apiHolder = retrofit.create(ApiHolder.class);
+        apiHolder = sparksoft.create(ApiHolder.class);
+
+        Retrofit manilaObservatory = new Retrofit.Builder()
+                .client(client)
+                .baseUrl("https://panahon.observatory.ph/resources/station/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        apiHolderAmbient = manilaObservatory.create(ApiHolderAmbient.class);
 
 //        Retrofit retrofit = new Retrofit.Builder()
 //                .client(client)
@@ -375,6 +388,24 @@ public class CommonFragment extends Fragment {
 
 
     private void sendToRemote(){
+
+        Call <MOResult> weather = apiHolderAmbient.getAmbientTemperature();
+        weather.enqueue(new Callback<MOResult>() {
+           @Override
+           public void onResponse(Call<MOResult> call, Response<MOResult> response) {
+               Log.d("AMBIENT TEMP", response.body().getWeatherData().getTemp());
+           }
+
+           @Override
+           public void onFailure(Call<MOResult> call, Throwable throwable) {
+
+               Log.d("AMBIENT TEMP", "Fail");
+           }
+        });
+
+
+
+
 //        sendingProgressBar.setVisibility(View.VISIBLE);
         LocalTempModel localTempModel = getFromLocalDb();
         deleteFromLocalDb();
