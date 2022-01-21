@@ -14,10 +14,10 @@ import java.util.List;
 public class LocalDbHelper extends SQLiteOpenHelper {
 
     public static final String COLUMN_ID = "ID";
-    public static final String COLUMN_RFID_NUMBER = "RF" + COLUMN_ID + "_NUMBER";
+    public static final String COLUMN_BAND_ID = "BAND__ID";
     public static final String TEMP_TABLE = "TEMP_TABLE";
     public static final String COLUMN_TEMPERATURE = "TEMPERATURE";
-    public static final String COLUMN_LOCATION = "LOCATION";
+    public static final String COLUMN_RFID_NUMBER = "RFID_NUMBER";
     public static final String COLUMN_DATETIME = "DATETIME";
 
     public LocalDbHelper(@Nullable Context context) {
@@ -28,9 +28,9 @@ public class LocalDbHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String createTable = "CREATE TABLE " + TEMP_TABLE + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_RFID_NUMBER + " INTEGER, " +
+                COLUMN_BAND_ID + " INTEGER, " +
                 COLUMN_TEMPERATURE + " REAL, " +
-                COLUMN_LOCATION + " TEXT, " +
+                COLUMN_RFID_NUMBER + " TEXT, " +
                 COLUMN_DATETIME + " NUMERIC )";
 
         db.execSQL(createTable);
@@ -45,9 +45,9 @@ public class LocalDbHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
 
-        cv.put(COLUMN_RFID_NUMBER, localTempModel.getRfidNumber());
+        cv.put(COLUMN_BAND_ID, localTempModel.getBandId());
         cv.put(COLUMN_TEMPERATURE, localTempModel.getTemperature());
-        cv.put(COLUMN_LOCATION, localTempModel.getLocation());
+        cv.put(COLUMN_RFID_NUMBER, localTempModel.getRfidNumber());
         cv.put(COLUMN_DATETIME, localTempModel.getDatetime());
 
         long insert = db.insert(TEMP_TABLE, null, cv);
@@ -67,12 +67,12 @@ public class LocalDbHelper extends SQLiteOpenHelper {
         LocalTempModel returnTempModel = null;
         if(cursor.moveToFirst()){
             int tagID = cursor.getInt(0);
-            int tagRfidNumber = cursor.getInt(1);
+            int tagBandId = cursor.getInt(1);
             double tagTemperature = cursor.getDouble(2);
-            String tagLocation = cursor.getString(3);
+            String tagRfidNumber = cursor.getString(3);
             String tagDateTime = cursor.getString(4);
 
-            returnTempModel = new LocalTempModel(tagID,tagRfidNumber,tagTemperature,tagLocation,tagDateTime);
+            returnTempModel = new LocalTempModel(tagID,tagBandId,tagTemperature,tagRfidNumber,tagDateTime);
         }
         return returnTempModel;
     }

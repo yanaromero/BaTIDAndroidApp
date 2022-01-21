@@ -11,8 +11,10 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiHolder {
-
-    @POST("new")
+//
+//    @POST("new")
+//    Call<TempData> createPost(@Body TempData body);
+    @POST("scan")
     Call<TempData> createPost(@Body TempData body);
 
     @GET("find/{id}")

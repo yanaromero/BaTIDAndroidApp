@@ -2,16 +2,16 @@ package com.favepc.reader.rfidreaderutility;
 
 public class LocalTempModel {
     private int id;
-    private int rfidNumber;
+    private int bandId;
     private double temperature;
-    private String location;
+    private String rfidNumber;
     private String datetime;
 
-    public LocalTempModel(int id, int rfidNumber, double temperature, String location, String datetime) {
+    public LocalTempModel(int id, int bandId, double temperature, String rfidNumber, String datetime) {
         this.id = id;
-        this.rfidNumber = rfidNumber;
+        this.bandId = bandId;
         this.temperature = temperature;
-        this.location = location;
+        this.rfidNumber = rfidNumber;
         this.datetime = datetime;
     }
 
@@ -22,9 +22,9 @@ public class LocalTempModel {
     public String toString() {
         return "LocalTempModel{" +
                 "id=" + id +
-                ", rfidNumber=" + rfidNumber +
+                ", bandId=" + bandId +
                 ", temperature=" + temperature +
-                ", location='" + location + '\'' +
+                ", rfidNumber='" + rfidNumber + '\'' +
                 ", datetime='" + datetime + '\'' +
                 '}';
     }
@@ -37,12 +37,12 @@ public class LocalTempModel {
         this.id = id;
     }
 
-    public int getRfidNumber() {
-        return rfidNumber;
+    public int getBandId() {
+        return bandId;
     }
 
-    public void setRfidNumber(int rfidNumber) {
-        this.rfidNumber = rfidNumber;
+    public void setBandId(int bandId) {
+        this.bandId = bandId;
     }
 
     public double getTemperature() {
@@ -53,12 +53,12 @@ public class LocalTempModel {
         this.temperature = temperature;
     }
 
-    public String getLocation() {
-        return location;
+    public String getRfidNumber() {
+        return rfidNumber;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setRfidNumber(String rfidNumber) {
+        this.rfidNumber = rfidNumber;
     }
 
     public String getDatetime() {

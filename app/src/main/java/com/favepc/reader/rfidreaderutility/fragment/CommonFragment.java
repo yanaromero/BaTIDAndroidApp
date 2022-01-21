@@ -46,6 +46,8 @@ import com.favepc.reader.rfidreaderutility.ApiHolderAmbient;
 import com.favepc.reader.rfidreaderutility.TempData;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,6 +75,8 @@ public class CommonFragment extends Fragment {
     public static final String PROCESS_DATA = "PROCESS_DATA";
     public int tempRaw = 0;
     public double tempConvert = 0.0;
+    public double ambientTemp;
+    public boolean lowTemp = false;
 
     private Context	mContext;
     private Activity mActivity;
@@ -160,9 +164,15 @@ public class CommonFragment extends Fragment {
 
         //initialize retrofit builder for api requests
 
+//        Retrofit sparksoft = new Retrofit.Builder()
+//                .client(client)
+//                .baseUrl("https://dbopayment.sparksoft.com.ph:4000/api/")
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//        apiHolder = sparksoft.create(ApiHolder.class);
         Retrofit sparksoft = new Retrofit.Builder()
                 .client(client)
-                .baseUrl("https://dbopayment.sparksoft.com.ph:4000/api/")
+                .baseUrl("http://13.250.127.145:4000/api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         apiHolder = sparksoft.create(ApiHolder.class);
@@ -184,6 +194,9 @@ public class CommonFragment extends Fragment {
         //initialize application sounds
         successSound = MediaPlayer.create(getContext(), R.raw.success);
         failSound = MediaPlayer.create(getContext(), R.raw.fail);
+
+        //initialize get ambient temp
+        getAmbientTemp();
 
     }
 
@@ -343,12 +356,12 @@ public class CommonFragment extends Fragment {
         }
     }
 
-    private void addToLocalDb(String rfidNumber, String temperature, String location, String datetime){
+    private void addToLocalDb(String bandId, String temperature, String rfidNumber, String datetime){
         LocalTempModel localTempModel = null;
 
-        //add rfidNumber, temperature, locationID, and datetime to local database
+        //add bandId, temperature, rfidNumberID, and datetime to local database
         try {
-            localTempModel = new LocalTempModel(-1,Integer.parseInt(rfidNumber),Double.parseDouble(temperature),location,datetime);
+            localTempModel = new LocalTempModel(-1,Integer.parseInt(bandId),Double.parseDouble(temperature),rfidNumber,datetime);
             Log.d("addTolocalDb", localTempModel.toString());
             LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
             boolean success = localDbHelper.addOne(localTempModel);
@@ -356,7 +369,7 @@ public class CommonFragment extends Fragment {
             Log.d("addToLocalDb", "Error creating temp data.");
             sendingProgress.setVisibility(View.GONE);
             textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
-            textProgress.setText("ID Number: " + rfidNumber + " is not a valid ID Number format. IDs must only contain numeric characters. Data cannot be sent to database.");
+            textProgress.setText("ID Number: " + bandId + " is not a valid ID Number format. IDs must only contain numeric characters. Data cannot be sent to database.");
             textTempCheck.setVisibility(View.GONE);
             failSound.start();
         }
@@ -391,20 +404,30 @@ public class CommonFragment extends Fragment {
             @Override
             public void onResponse(Call<MOResult> call, Response<MOResult> response) {
                 Log.d("AMBIENT TEMP", response.body().getWeatherData().getTemp());
+                ambientTemp = Double.parseDouble(response.body().getWeatherData().getTemp());
             }
 
             @Override
             public void onFailure(Call<MOResult> call, Throwable throwable) {
-
                 Log.d("AMBIENT TEMP", "Fail");
+                //don't change ambientTemp if fail
             }
         });
-
     }
 
+    private double getOffset(){
+        getAmbientTemp();
 
+        double offset = (0.0142*ambientTemp*ambientTemp)-(1.1935*ambientTemp)+25.314;
+        if(Double.compare(ambientTemp, 37.0) > 0){
+            return 0.0;
+        }
+        else {
+            return offset;
+        }
+
+    }
     private void sendToRemote(){
-       getAmbientTemp();
 
 
 //        sendingProgressBar.setVisibility(View.VISIBLE);
@@ -417,8 +440,8 @@ public class CommonFragment extends Fragment {
             //parse the LocalTempModel to TempData
             final TempData tempData = new TempData(
                     String.valueOf(localTempModel.getTemperature()),
-                    String.valueOf(localTempModel.getRfidNumber()),
-                    localTempModel.getLocation(),
+                    String.valueOf(localTempModel.getBandId()),
+                    localTempModel.getRfidNumber(),
                     localTempModel.getDatetime()
             );
 
@@ -429,23 +452,24 @@ public class CommonFragment extends Fragment {
                 public void onResponse(Call<TempData> call, Response<TempData> response) {
 //                    Log.d("check loc", "onResponse: getLOCATION:" + );
                     if(
-                            response.body().getDatetime().replace("T"," ").replace(".000Z","").equals(tempData.getDatetime()) &&
-                            response.body().getLocation().equals(tempData.getLocation()) &&
-                            response.body().getRfidNumber().equals(tempData.getRfidNumber()) &&
-                            response.body().getTemperature().equals(tempData.getTemperature())
+//                            response.body().getDatetime().replace("T"," ").replace(".000Z","").equals(tempData.getDatetime()) &&
+//                            response.body().getRfidNumber().equals(tempData.getRfidNumber()) &&
+//                            response.body().getBandId().equals(tempData.getBandId()) &&
+//                            response.body().getTemperature().equals(tempData.getTemperature())
+                            response.code() == 200
                     ) {
                         //call sendToRemote() function again for queued entries in local database
                         sendingProgress.setVisibility(View.GONE);
                         if(containsQueue()){
                             textProgress.setBackgroundColor(Color.parseColor("#efec5c")); //make bg of textview yellow
-                            textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Please wait, sending queue of data from phone database. This might take some time.");
+                            textProgress.setText("Successfully sent data for ID Number: " + tempData.getBandId() +". Please wait, sending queue of data from phone database. This might take some time.");
 
                         } else{
                             textProgress.setBackgroundColor(Color.parseColor("#57e31c")); //make bg of textview green
-                            textProgress.setText("Successfully sent data for ID Number: " + tempData.getRfidNumber() +". Next person in line please scan your tag.");
+                            textProgress.setText("Successfully sent data for ID Number: " + tempData.getBandId() +". Next person in line please scan your tag.");
                             Log.d("DOUBLE PARSE", "onResponse: " +Double.parseDouble(tempData.getTemperature()));
                             //check if temperature is within normal range
-                            if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.0) < 0 ){
+                            if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.5) < 0 ){
                                 textTempCheck.setBackgroundColor(Color.parseColor("#57e31c"));//make bg of textview green
                                 textTempCheck.setText("Within normal body temperature.");
                                 successSound.start();
@@ -464,14 +488,14 @@ public class CommonFragment extends Fragment {
                         failSound.start();
                         sendingProgress.setVisibility(View.GONE);
                         textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
-                        textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getRfidNumber() + ". Data temporarily stored on phone. Will attempt to send data again later.");
-                        addToLocalDb(String.valueOf(tempData.getRfidNumber()),
+                        textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getBandId() + ". Data temporarily stored on phone. Will attempt to send data again later.");
+                        addToLocalDb(String.valueOf(tempData.getBandId()),
                                     String.valueOf(tempData.getTemperature()),
-                                    tempData.getLocation(),
+                                    tempData.getRfidNumber(),
                                     tempData.getDatetime());
                         Log.d("TRACK", "onResponse: " + response.code() + response);
                         //check if temperature is within normal range
-                        if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.0) < 0 ){
+                        if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.5) < 0 ){
                             textTempCheck.setBackgroundColor(Color.parseColor("#57e31c"));//make bg of textview green
                             textTempCheck.setText("Within normal body temperature.");
                             successSound.start();
@@ -493,13 +517,13 @@ public class CommonFragment extends Fragment {
                     Log.d("TRACK", "Failure message:" + throwable.getMessage());
                     sendingProgress.setVisibility(View.GONE);
                     textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
-                    textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getRfidNumber() + ". Data temporarily stored on phone. Will attempt to send data again later.");
-                    addToLocalDb(String.valueOf(tempData.getRfidNumber()),
+                    textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getBandId() + ". Data temporarily stored on phone. Will attempt to send data again later.");
+                    addToLocalDb(String.valueOf(tempData.getBandId()),
                             String.valueOf(tempData.getTemperature()),
-                            tempData.getLocation(),
+                            tempData.getRfidNumber(),
                             tempData.getDatetime());
                     //check if temperature is within normal range
-                    if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.0) < 0 ){
+                    if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.5) < 0 ){
                         textTempCheck.setBackgroundColor(Color.parseColor("#57e31c"));//make bg of textview green
                         textTempCheck.setText("Within normal body temperature.");
                         successSound.start();
@@ -515,11 +539,11 @@ public class CommonFragment extends Fragment {
         }
     }
 
-    private void requestPost(String epcPost, String tempPost, String locationPost, String datetime) {
+    private void requestPost(String epcPost, String tempPost, String rfidNumberPost, String datetime) {
         sendingProgress.setVisibility(View.VISIBLE);
         textProgress.setBackgroundColor(Color.parseColor("#B1D4E0"));
         textProgress.setText("Attempting to send to online database");
-        addToLocalDb(epcPost,tempPost,locationPost,datetime);
+        addToLocalDb(epcPost,tempPost,rfidNumberPost,datetime);
         sendToRemote();
     }
 
@@ -581,44 +605,66 @@ public class CommonFragment extends Fragment {
                                             "Temperature reading was invalid. Please try again.",
                                             mDateFormat.format(new Date())));
 
-                                    epcPrev = "";
                                     readPrev = readCur;
+                                    epcPrev = "";
                                     failSound.start();
                                 }
                             }
                             else{
-                                //if it's not the same tag as last reading
-                                if(!epcCur.equals(epcPrev))
-                                {
+                                //extract and convert temperature
+                                readCur = readCur.replace("R", "");
+                                tempRaw = Integer.parseInt(readCur, 16);
+                                tempConvert = tempRaw;
+                                tempConvert = tempConvert / 4; //tempConvert is true skin temp at this point
+
+                                // checks if skin temp is above 31 & if it's not the same tag as last reading
+                                if ((Double.compare(tempConvert, 31) >= 0 && !epcCur.equals(epcPrev)) ||
+                                        (Double.compare(tempConvert, 31) >= 0 && lowTemp == true)) {
+                                    lowTemp = false;
                                     //display tag number
                                     updateView(new Common(true,
                                             epcCur,
                                             mDateFormat.format(new Date())));
 
-                                    //extract and convert temperature
-                                    readCur = readCur.replace("R", "");
-                                    tempRaw = Integer.parseInt(readCur, 16);
-                                    tempConvert = tempRaw;
-                                    tempConvert = tempConvert / 4;
-                                    readCur = "Temperature: " + String.valueOf(tempConvert) + " C";
+                                    tempConvert = tempConvert + getOffset();
+                                    BigDecimal tempConvert2Places=new BigDecimal(tempConvert).setScale(2, RoundingMode.UP);
+                                    readCur = "Temperature: " + tempConvert2Places + " C";
 
-                                    //get readerID for location ID
-                                    readerID = readerID.replace("S","");
+                                    //get readerID for rfidNumber ID
+                                    readerID = readerID.replace("S", "");
 
                                     //generate current datetime
                                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                                     String datetime = sdf.format(new Date());
 
                                     //call requestPost function to send data to database
-                                    requestPost(epcCur,String.valueOf(tempConvert),readerID,datetime);
+                                    requestPost(epcCur, String.valueOf(tempConvert2Places), readerID, datetime);
 
                                     //display temperature to screen
                                     updateView(new Common(true,
                                             readCur,
                                             mDateFormat.format(new Date())));
-
                                     epcPrev = epcCur;
                                     readPrev = "";
+                                }
+                                //if it's not the same tag as last reading but below 31
+                                else if(!epcCur.equals(epcPrev) )
+                                {
+                                    //display tag number
+                                    updateView(new Common(true,
+                                            epcCur,
+                                            mDateFormat.format(new Date())));
+
+                                    //display low temperature warning to screen
+                                    lowTemp = true;
+                                    updateView(new Common(true,
+                                            "Temperature read too low.",
+                                            mDateFormat.format(new Date())));
+                                    textTempCheck.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
+                                    textTempCheck.setTextColor(Color.parseColor("#ffffff"));
+                                    textTempCheck.setText("Detected temperature too low. Please check if band is worn properly and wait for a few minutes for accurate temperature.");
+                                    failSound.start();
+                                    epcPrev = epcCur;
                                 }
 
                             }
