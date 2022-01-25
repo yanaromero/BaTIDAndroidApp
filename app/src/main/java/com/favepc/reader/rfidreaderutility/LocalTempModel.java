@@ -3,13 +3,15 @@ package com.favepc.reader.rfidreaderutility;
 public class LocalTempModel {
     private int id;
     private int bandId;
+    private double rawTemperature;
     private double temperature;
     private String rfidNumber;
     private String datetime;
 
-    public LocalTempModel(int id, int bandId, double temperature, String rfidNumber, String datetime) {
+    public LocalTempModel(int id, int bandId, double rawTemperature, double temperature, String rfidNumber, String datetime) {
         this.id = id;
         this.bandId = bandId;
+        this.rawTemperature = rawTemperature;
         this.temperature = temperature;
         this.rfidNumber = rfidNumber;
         this.datetime = datetime;
@@ -23,6 +25,7 @@ public class LocalTempModel {
         return "LocalTempModel{" +
                 "id=" + id +
                 ", bandId=" + bandId +
+                ", rawTemperature=" + rawTemperature +
                 ", temperature=" + temperature +
                 ", rfidNumber='" + rfidNumber + '\'' +
                 ", datetime='" + datetime + '\'' +
@@ -45,6 +48,9 @@ public class LocalTempModel {
         this.bandId = bandId;
     }
 
+    public double getRawTemperature() {
+        return rawTemperature;
+    }
     public double getTemperature() {
         return temperature;
     }

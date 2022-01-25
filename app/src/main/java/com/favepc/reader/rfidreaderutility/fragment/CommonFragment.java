@@ -63,6 +63,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Body;
 
 /**
  * Created by Bruce_Chiang on 2017/3/10.
@@ -74,6 +75,7 @@ public class CommonFragment extends Fragment {
     public static final String PROCESS_COMMAND = "PROCESS_COMMAND";
     public static final String PROCESS_DATA = "PROCESS_DATA";
     public int tempRaw = 0;
+    public  double tempRawDouble = 0.0;
     public double tempConvert = 0.0;
     public double ambientTemp;
     public boolean lowTemp = false;
@@ -178,7 +180,6 @@ public class CommonFragment extends Fragment {
         apiHolder = sparksoft.create(ApiHolder.class);
 
         Retrofit manilaObservatory = new Retrofit.Builder()
-                .client(client)
                 .baseUrl("https://panahon.observatory.ph/resources/station/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
@@ -356,18 +357,19 @@ public class CommonFragment extends Fragment {
         }
     }
 
-    private void addToLocalDb(String bandId, String temperature, String rfidNumber, String datetime){
+    private void addToLocalDb(String bandId, String rawTemperature, String temperature, String rfidNumber, String datetime){
         LocalTempModel localTempModel = null;
 
         //add bandId, temperature, rfidNumberID, and datetime to local database
         try {
-            localTempModel = new LocalTempModel(-1,Integer.parseInt(bandId),Double.parseDouble(temperature),rfidNumber,datetime);
+            localTempModel = new LocalTempModel(-1,Integer.parseInt(bandId),Double.parseDouble(rawTemperature),Double.parseDouble(temperature),rfidNumber,datetime);
             Log.d("addTolocalDb", localTempModel.toString());
             LocalDbHelper localDbHelper = new LocalDbHelper(getContext());
             boolean success = localDbHelper.addOne(localTempModel);
         } catch (NumberFormatException ex){
             Log.d("addToLocalDb", "Error creating temp data.");
             sendingProgress.setVisibility(View.GONE);
+            textProgress.setVisibility(View.VISIBLE);
             textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
             textProgress.setText("ID Number: " + bandId + " is not a valid ID Number format. IDs must only contain numeric characters. Data cannot be sent to database.");
             textTempCheck.setVisibility(View.GONE);
@@ -439,27 +441,24 @@ public class CommonFragment extends Fragment {
 
             //parse the LocalTempModel to TempData
             final TempData tempData = new TempData(
+                    String.valueOf(localTempModel.getRawTemperature()),
                     String.valueOf(localTempModel.getTemperature()),
                     String.valueOf(localTempModel.getBandId()),
                     localTempModel.getRfidNumber(),
                     localTempModel.getDatetime()
             );
 
+            Log.d("TEMPDATA CONTENT", "sendToRemote: " + tempData.getRawTemperature() +"," + tempData.getTemperature() + "," + tempData.getBandId() + "," + tempData.getRfidNumber() + "," + tempData.getDatetime());
             //enqueue post request
             Call<TempData> call = apiHolder.createPost(tempData);
             call.enqueue(new Callback<TempData>() {
                 @Override
                 public void onResponse(Call<TempData> call, Response<TempData> response) {
-//                    Log.d("check loc", "onResponse: getLOCATION:" + );
-                    if(
-//                            response.body().getDatetime().replace("T"," ").replace(".000Z","").equals(tempData.getDatetime()) &&
-//                            response.body().getRfidNumber().equals(tempData.getRfidNumber()) &&
-//                            response.body().getBandId().equals(tempData.getBandId()) &&
-//                            response.body().getTemperature().equals(tempData.getTemperature())
-                            response.code() == 200
-                    ) {
+                    Log.d("check loc", "onResponse: getLOCATION:" );
+                    if(response.code() == 200) {
                         //call sendToRemote() function again for queued entries in local database
                         sendingProgress.setVisibility(View.GONE);
+                        textProgress.setVisibility(View.VISIBLE);
                         if(containsQueue()){
                             textProgress.setBackgroundColor(Color.parseColor("#efec5c")); //make bg of textview yellow
                             textProgress.setText("Successfully sent data for ID Number: " + tempData.getBandId() +". Please wait, sending queue of data from phone database. This might take some time.");
@@ -467,7 +466,6 @@ public class CommonFragment extends Fragment {
                         } else{
                             textProgress.setBackgroundColor(Color.parseColor("#57e31c")); //make bg of textview green
                             textProgress.setText("Successfully sent data for ID Number: " + tempData.getBandId() +". Next person in line please scan your tag.");
-                            Log.d("DOUBLE PARSE", "onResponse: " +Double.parseDouble(tempData.getTemperature()));
                             //check if temperature is within normal range
                             if(Double.compare(Double.parseDouble(tempData.getTemperature()),37.5) < 0 ){
                                 textTempCheck.setBackgroundColor(Color.parseColor("#57e31c"));//make bg of textview green
@@ -487,9 +485,11 @@ public class CommonFragment extends Fragment {
                         //if response code is not successful play fail sound and add back to the local database
                         failSound.start();
                         sendingProgress.setVisibility(View.GONE);
+                        textProgress.setVisibility(View.VISIBLE);
                         textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
                         textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getBandId() + ". Data temporarily stored on phone. Will attempt to send data again later.");
                         addToLocalDb(String.valueOf(tempData.getBandId()),
+                                    String.valueOf(tempData.getRawTemperature()),
                                     String.valueOf(tempData.getTemperature()),
                                     tempData.getRfidNumber(),
                                     tempData.getDatetime());
@@ -516,9 +516,11 @@ public class CommonFragment extends Fragment {
                     failSound.start();
                     Log.d("TRACK", "Failure message:" + throwable.getMessage());
                     sendingProgress.setVisibility(View.GONE);
+                    textProgress.setVisibility(View.VISIBLE);
                     textProgress.setBackgroundColor(Color.parseColor("#ec1e13")); //make bg of textview red
                     textProgress.setText("Unsuccessfully sent data to online database for ID Number: " + tempData.getBandId() + ". Data temporarily stored on phone. Will attempt to send data again later.");
                     addToLocalDb(String.valueOf(tempData.getBandId()),
+                            String.valueOf(tempData.getRawTemperature()),
                             String.valueOf(tempData.getTemperature()),
                             tempData.getRfidNumber(),
                             tempData.getDatetime());
@@ -539,11 +541,12 @@ public class CommonFragment extends Fragment {
         }
     }
 
-    private void requestPost(String epcPost, String tempPost, String rfidNumberPost, String datetime) {
+    private void requestPost(String epcPost, String rawTempPost,String tempPost, String rfidNumberPost, String datetime) {
         sendingProgress.setVisibility(View.VISIBLE);
+        textProgress.setVisibility(View.VISIBLE);
         textProgress.setBackgroundColor(Color.parseColor("#B1D4E0"));
         textProgress.setText("Attempting to send to online database");
-        addToLocalDb(epcPost,tempPost,rfidNumberPost,datetime);
+        addToLocalDb(epcPost,rawTempPost, tempPost,rfidNumberPost,datetime);
         sendToRemote();
     }
 
@@ -615,6 +618,8 @@ public class CommonFragment extends Fragment {
                                 readCur = readCur.replace("R", "");
                                 tempRaw = Integer.parseInt(readCur, 16);
                                 tempConvert = tempRaw;
+                                tempRawDouble = tempRaw;
+                                tempRawDouble = tempRawDouble / 4;
                                 tempConvert = tempConvert / 4; //tempConvert is true skin temp at this point
 
                                 // checks if skin temp is above 31 & if it's not the same tag as last reading
@@ -638,7 +643,7 @@ public class CommonFragment extends Fragment {
                                     String datetime = sdf.format(new Date());
 
                                     //call requestPost function to send data to database
-                                    requestPost(epcCur, String.valueOf(tempConvert2Places), readerID, datetime);
+                                    requestPost(epcCur, String.valueOf(tempRawDouble), String.valueOf(tempConvert2Places), readerID, datetime);
 
                                     //display temperature to screen
                                     updateView(new Common(true,
@@ -657,6 +662,7 @@ public class CommonFragment extends Fragment {
 
                                     //display low temperature warning to screen
                                     lowTemp = true;
+                                    textProgress.setVisibility(View.GONE);
                                     updateView(new Common(true,
                                             "Temperature read too low.",
                                             mDateFormat.format(new Date())));

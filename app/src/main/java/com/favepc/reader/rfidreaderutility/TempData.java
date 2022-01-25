@@ -1,6 +1,8 @@
 package com.favepc.reader.rfidreaderutility;
 
 public class TempData {
+    private String rawTemp;
+
     private String temperature;
 
     private String bandId;
@@ -9,11 +11,20 @@ public class TempData {
 
     private String date_time;
 
-    public TempData(String temp, String epc, String rfidNumber, String date_time) {
+    public TempData(String rawTemp,String temp, String epc, String rfidNumber, String date_time) {
         this.bandId = epc;
+        this.rawTemp = rawTemp;
         this.temperature = temp;
         this.rfidNumber = rfidNumber;
         this.date_time = date_time;
+    }
+
+    public String getRawTemperature() {
+        return rawTemp;
+    }
+
+    public void setRawTemperature(String temperature) {
+        this.rawTemp = rawTemp;
     }
 
     public String getTemperature() {
