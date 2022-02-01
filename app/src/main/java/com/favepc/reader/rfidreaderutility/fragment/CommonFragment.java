@@ -79,6 +79,7 @@ public class CommonFragment extends Fragment {
     public double tempConvert = 0.0;
     public double ambientTemp;
     public boolean lowTemp = false;
+    public boolean noAmbientTemp = false;
 
     private Context	mContext;
     private Activity mActivity;
@@ -422,9 +423,15 @@ public class CommonFragment extends Fragment {
 
         double offset = (0.0142*ambientTemp*ambientTemp)-(1.1935*ambientTemp)+25.314;
         if(Double.compare(ambientTemp, 37.0) > 0){
+            noAmbientTemp = false;
+            return 0.0;
+        }
+        else if (Double.compare(ambientTemp, 0.0) == 0){
+            noAmbientTemp = true;
             return 0.0;
         }
         else {
+            noAmbientTemp = false;
             return offset;
         }
 
@@ -633,7 +640,7 @@ public class CommonFragment extends Fragment {
 
                                     tempConvert = tempConvert + getOffset();
                                     BigDecimal tempConvert2Places=new BigDecimal(tempConvert).setScale(2, RoundingMode.UP);
-                                    readCur = "Temperature: " + tempConvert2Places + " C";
+                                    readCur = tempConvert2Places + " C";
 
                                     //get readerID for rfidNumber ID
                                     readerID = readerID.replace("S", "");
@@ -646,9 +653,16 @@ public class CommonFragment extends Fragment {
                                     requestPost(epcCur, String.valueOf(tempRawDouble), String.valueOf(tempConvert2Places), readerID, datetime);
 
                                     //display temperature to screen
-                                    updateView(new Common(true,
-                                            readCur,
-                                            mDateFormat.format(new Date())));
+                                    if(noAmbientTemp){
+                                        updateView(new Common(true,
+                                                "Skin temperature: " + readCur,
+                                                mDateFormat.format(new Date())));
+                                    }
+                                    else {
+                                        updateView(new Common(true,
+                                                "Temperature: " + readCur,
+                                                mDateFormat.format(new Date())));
+                                    }
                                     epcPrev = epcCur;
                                     readPrev = "";
                                 }
